@@ -1,9 +1,9 @@
 === Jetpack by WordPress.com ===
 Contributors: automattic, apeatling, beaulebens, hugobaeta, joen, mdawaffe, andy, designsimply, hew, westi, eoigal, tmoorewp
 Tags: WordPress.com, statistics, stats, views, tweets, twitter, widget, gravatar, hovercards, profile, equations, latex, math, maths, youtube, shortcode, archives, audio, blip, bliptv, dailymotion, digg, flickr, googlevideo, google, googlemaps, kyte, kytetv, livevideo, redlasso, rockyou, rss, scribd, slide, slideshare, soundcloud, vimeo, shortlinks, wp.me, subscriptions
-Requires at least: 3.1
-Tested up to: 3.3
-Stable tag: 1.2.2
+Requires at least: 3.2
+Tested up to: 3.3.2
+Stable tag: 1.3
 
 Supercharge your WordPress site with powerful features previously only available to WordPress.com users.
 
@@ -75,6 +75,36 @@ Use [shortcodes](http://support.wordpress.com/shortcodes/) to embed your media. 
 5. Spelling and Grammar demo.
 
 == Changelog ==
+
+= 1.3 =
+* Enhancement: Add Contact Forms feature.  Formerly Grunion Contact Forms.
+* Bug Fix: Tweak YouTube autoembedder to catch more YouTube URLs.
+* Bug Fix: Correctly load the Sharing CSS files.
+
+= 1.2.4 =
+* Bug Fix: Fix rare bug with static front pages
+
+= 1.2.3 =
+* Enhancement: Twitter Widget: Expand t.co URLs
+* Bug Fix: Various PHP Notices.
+* Bug Fix: WordPress Deprecated `add_contextual_help()` notices
+* Bug Fix: Don't display unimportant DB errors when processing Jetpack nonces
+* Bug Fix: Correctly sync data during certain MultiSite cases.
+* Bug Fix: Stats: Allow sparkline img to load even when there is a DB upgrade.
+* Bug Fix: Stats: Replace "loading title" with post title regardless of type and status.
+* Bug Fix: Stats: Avoid edge case infinite redirect for `show_on_front=page` sites where the `home_url()` conatins uppercase letters.
+* Bug Fix: Subscriptions: Don't send subscriptions if the feature is turned off in Jetpack.
+* Bug Fix: Subscriptions: Fix pagination of subscribers.
+* Bug Fix: Subscriptions: Sync data about categories/tags as well to improve subscription emails.
+* Bug Fix: Subscriptions: Better styling for the subscription success message.
+* Bug Fix: Shortcodes: Support for multiple Google Maps in one post.  Support for all Google Maps URLs.
+* Bug Fix: Shortcodes: Improved support for youtu.be URLs
+* Bug Fix: Shortcodes: Improved Vimeo embeds.
+* Bug Fix: Sharing: Switch to the 20px version of Google's +1 button for consistency.
+* Bug Fix: Sharing: Fix Google +1 button HTML validation issues.
+* Bug Fix: Sharing: Disable sharing buttons during preview.
+* Bug Fix: Spelling and Grammar: Properly handle proofreading settings.
+* Bug Fix: Spelling and Grammar: Don't prevent post save when proofreading service is unavailable.
 
 = 1.2.2 =
 * Bug Fix: Ensure expected modules get reactivated correctly during upgrade.
