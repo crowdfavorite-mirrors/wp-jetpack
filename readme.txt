@@ -3,7 +3,7 @@ Contributors: automattic, apeatling, beaulebens, hugobaeta, joen, mdawaffe, andy
 Tags: WordPress.com, statistics, stats, views, tweets, twitter, widget, gravatar, hovercards, profile, equations, latex, math, maths, youtube, shortcode, archives, audio, blip, bliptv, dailymotion, digg, flickr, googlevideo, google, googlemaps, kyte, kytetv, livevideo, redlasso, rockyou, rss, scribd, slide, slideshare, soundcloud, vimeo, shortlinks, wp.me, subscriptions
 Requires at least: 3.2
 Tested up to: 3.4
-Stable tag: 1.3.4
+Stable tag: 1.4.1
 
 Supercharge your WordPress site with powerful features previously only available to WordPress.com users.
 
@@ -17,6 +17,8 @@ Features include:
 
 * Simple, concise stats with no additional load on your server.  Previously provided by [WordPress.com Stats](http://wordpress.org/extend/plugins/stats/).
 * Email subscriptions for your blog's posts and your post's comments.
+* Social networking enabled comment system.
+* Simple, Akismet-backed contact forms.
 * The [WP.me URL shortener](http://wp.me/sf2B5-shorten).
 * Hovercard popups for your commenters via [Gravatar](http://gravatar.com/).
 * Easily embedded media from popular sites like YouTube, Digg, and Vimeo.
@@ -59,7 +61,6 @@ Use [shortcodes](http://support.wordpress.com/shortcodes/) to embed your media. 
 * [[googlevideo]](http://support.wordpress.com/videos/google-video/)
 * [[polldaddy]](http://support.polldaddy.com/wordpress-shortcodes/)
 * [[scribd]](http://support.wordpress.com/scribd/)
-* [[slide]](http://support.wordpress.com/slideshows/slide/)
 * [[slideshare]](http://support.wordpress.com/slideshows/slideshare/)
 * [[soundcloud]](http://support.wordpress.com/audio/soundcloud-audio-player/)
 * [[vimeo]](http://support.wordpress.com/videos/vimeo/)
@@ -75,6 +76,22 @@ Use [shortcodes](http://support.wordpress.com/shortcodes/) to embed your media. 
 5. Spelling and Grammar demo.
 
 == Changelog ==
+
+= 1.4.1 =
+* Bug Fix: Jetpack Comments / Subscriptions: Add checkboxes and logic control for the Subscription checkboxes.
+
+= 1.4 =
+* Enhancement: Add Jetpack Comments feature.
+* Bug Fix: Sharing: Make the sharing_label translatable.
+* Bug Fix: Sharing: Fixed the file type on the LinkedIn graphic.
+* Bug Fix: Sharing: Fixes for the Faceboox Like button language locales.
+* Bug Fix: Sharing: Updates for the "more" button when used with touch screen devices.
+* Bug Fix: Sharing: Properly scope the More button so that multiple More buttons on a page behave properly.
+* Bug Fix: Shortcodes: Update the YouTube and Audio shortcodes to better handle spaces in the URLs.
+* Bug Fix: Shortcodes: Make the YouTube shortcode respect embed settings in Settings -> Media when appropriate.
+* Bug Fix: Shortcodes: Removed the Slide.com shortcode; Slide.com no longer exists.
+* Bug Fix: Shortcodes: Match both http and https links in the [googlemaps] shortcode.
+* Bug Fix: After the Deadline: Code clean up and removal of inconsistencies.
 
 = 1.3.4 =
 * Bug Fix: Revert changes to the top level menu that are causing problems.
