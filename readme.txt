@@ -3,7 +3,7 @@ Contributors: automattic, apeatling, beaulebens, hugobaeta, joen, mdawaffe, andy
 Tags: WordPress.com, statistics, stats, views, tweets, twitter, widget, gravatar, hovercards, profile, equations, latex, math, maths, youtube, shortcode, archives, audio, blip, bliptv, dailymotion, digg, flickr, googlevideo, google, googlemaps, kyte, kytetv, livevideo, redlasso, rockyou, rss, scribd, slide, slideshare, soundcloud, vimeo, shortlinks, wp.me, subscriptions
 Requires at least: 3.2
 Tested up to: 3.4
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 
 Supercharge your WordPress site with powerful features previously only available to WordPress.com users.
 
@@ -76,6 +76,11 @@ Use [shortcodes](http://support.wordpress.com/shortcodes/) to embed your media. 
 5. Spelling and Grammar demo.
 
 == Changelog ==
+
+= 1.4.2 =
+* Bug Fix: Jetpack Comments: Add alternative Javascript event listener for Internet 8 users.
+* Enhancement: Remove more PHP 4 backwards-compatible code (WordPress andJetpack only support PHP 5).
+* Enhancement: Remove more WordPress 3.1 and under backwards-compatible code.
 
 = 1.4.1 =
 * Bug Fix: Jetpack Comments / Subscriptions: Add checkboxes and logic control for the Subscription checkboxes.

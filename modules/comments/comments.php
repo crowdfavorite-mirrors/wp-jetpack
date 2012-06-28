@@ -113,9 +113,6 @@ class Jetpack_Comments extends Highlander_Comments_Base {
 
 		// After a comment is posted
 		add_action( 'comment_post', array( $this, 'add_comment_meta' ) );
-
-		// Add some JS to the footer
-		add_action( 'wp_footer', array( $this, 'watch_comment_parent' ), 100 );
 	}
 
 	/** Output Methods ********************************************************/
@@ -125,6 +122,9 @@ class Jetpack_Comments extends Highlander_Comments_Base {
 	 * @since JetpackComments (1.4)
 	 */
 	public function comment_form_before() {
+		// Add some JS to the footer
+		add_action( 'wp_footer', array( $this, 'watch_comment_parent' ), 100 );
+
 		ob_start();
 	}
 
@@ -274,13 +274,23 @@ class Jetpack_Comments extends Highlander_Comments_Base {
 			};
 
 			if ( window.postMessage ) {
-				window.addEventListener( 'message', function( event ) {
-					if ( <?php echo json_encode( esc_url_raw( $url_origin ) ); ?> !== event.origin ) {
-						return;
-					}
+				if ( document.addEventListener ) {
+					window.addEventListener( 'message', function( event ) {
+						if ( <?php echo json_encode( esc_url_raw( $url_origin ) ); ?> !== event.origin ) {
+							return;
+						}
 
-					jQuery( frame ).height( event.data );
-				} );
+						jQuery( frame ).height( event.data );
+					} );
+				} else if ( document.attachEvent ) {
+					window.attachEvent( 'message', function( event ) {
+						if ( <?php echo json_encode( esc_url_raw( $url_origin ) ); ?> !== event.origin ) {
+							return;
+						}
+
+						jQuery( frame ).height( event.data );
+					} );
+				}
 			}
 		</script>
 
