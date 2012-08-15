@@ -1,9 +1,9 @@
 === Jetpack by WordPress.com ===
-Contributors: automattic, apeatling, beaulebens, hugobaeta, joen, mdawaffe, andy, designsimply, hew, westi, eoigal, tmoorewp
+Contributors: automattic, apeatling, beaulebens, hugobaeta, joen, mdawaffe, andy, designsimply, hew, westi, eoigal, tmoorewp, matt
 Tags: WordPress.com, statistics, stats, views, tweets, twitter, widget, gravatar, hovercards, profile, equations, latex, math, maths, youtube, shortcode, archives, audio, blip, bliptv, dailymotion, digg, flickr, googlevideo, google, googlemaps, kyte, kytetv, livevideo, redlasso, rockyou, rss, scribd, slide, slideshare, soundcloud, vimeo, shortlinks, wp.me, subscriptions
 Requires at least: 3.2
-Tested up to: 3.4
-Stable tag: 1.5
+Tested up to: 3.4.1
+Stable tag: 1.6.1
 
 Supercharge your WordPress site with powerful features previously only available to WordPress.com users.
 
@@ -78,6 +78,28 @@ Use [shortcodes](http://support.wordpress.com/shortcodes/) to embed your media. 
 6. Gallery Carousel.
 
 == Changelog ==
+
+= 1.6.1 =
+* Bug Fix: Prevent Fatal error under certain conditions in sharing module
+* Bug Fix: Add cachebuster to sharing.css
+* Bug Fix: Disable via for Twitter until more robust code is in place
+
+= 1.6 =
+* Enhancement: Carousel: Better image resolution selection based on available width/height.
+* Enhancement: Carousel: Load image caption, metadata, comments, et alii when a slide is clicked to switch to instead of waiting.
+* Enhancement: Carousel: Added a "Comment" button and handling to scroll to and focus on comment textarea.
+* Enhancement: Widgets: Facebook Likebox now supports a height parameter and a better width parameter.
+* Enhancement: Widgets: Better feedback when widgets are not set up properly.
+* Enhancement: Shortcodes: Google Maps shortcode now supports percentages in the width.
+* Enhancement: Shortcodes: Update Polldaddy shortcode for more efficient Javascript libraries.
+* Enhancement: Shortcodes: Youtube shortcode now has playlist support.
+* Enhancement: Add Gravatar Profile widget.
+* Enhancement: Update Sharedaddy to latest version, including Pinterest support.
+* Enhancement: Retinize Jetpack and much of WordPress.
+* Bug Fix: Shortcodes: Fix Audio shortcode color parameter and rename encoding function.
+* Bug Fix: Shortcodes: Don't output HTML 5 version of the Audio shortcode because of a bug with Google Reader.
+* Bug Fix: Jetpack Comments: Don't overlead the addComments object if it doesn't exist. Fixes spacing issue with comment form.
+* Bug Fix: Contact Form: If send_to_editor() exists, use it. Fixes an IE9 text area issue.
 
 = 1.5 =
 * Enhancement: Add Gallery Carousel feature
