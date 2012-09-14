@@ -62,7 +62,8 @@ jQuery(document).ready(function($) {
 					'left'     : 0
 				});
 
-			buttons = $('<div class="jp-carousel-buttons">' + buttons + '</div>');
+			buttons  = '<a class="jp-carousel-commentlink" href="#">' + jetpackCarouselStrings.comment + '</a>';
+			buttons  = $('<div class="jp-carousel-buttons">' + buttons + '</div>');
 			
 			caption    = $('<h2></h2>');
 			photo_info = $('<div class="jp-carousel-photo-info"></div>').append(caption);
@@ -238,6 +239,13 @@ jQuery(document).ready(function($) {
 
 					if ( target.is(gallery) || target.parents().add(target).is(close_hint) ) {
 						container.jp_carousel('close');
+					} else if ( target.hasClass('jp-carousel-commentlink') ) {
+						e.preventDefault();
+						e.stopPropagation();
+						$(window).unbind('keydown', keyListener);
+						container.animate({scrollTop: parseInt(info.position()['top'], 10)}, 'fast');
+						$('#jp-carousel-comment-form-submit-and-info-wrapper').slideDown('fast');
+						$('#jp-carousel-comment-form-comment-field').focus();
 					} else if ( target.parents('#jp-carousel-comment-form-container').length ) {
 						var textarea = $('#jp-carousel-comment-form-comment-field')
 							.blur(function(){
@@ -546,33 +554,31 @@ jQuery(document).ready(function($) {
 			previous[method]({left:-previous.width() + (screenPadding * 0.75) }).show();
 			next[method]({left:gallery.width() - (screenPadding * 0.75) }).show();
 
-			setTimeout( function() {
-				document.location.href = document.location.href.replace(/#.*/, '') + '#jp-carousel-' + current.data('attachment-id');
-				gallery.jp_carousel('resetButtons', current);
-				container.trigger('jp_carousel.selectSlide', [current]);
+			document.location.href = document.location.href.replace(/#.*/, '') + '#jp-carousel-' + current.data('attachment-id');
+			gallery.jp_carousel('resetButtons', current);
+			container.trigger('jp_carousel.selectSlide', [current]);
 
-				$( 'div.jp-carousel-image-meta', 'div.jp-carousel-wrap' ).html('');
-				
-				gallery.jp_carousel('getTitleDesc', { title: current.data('title'), desc: current.data('desc') } );
-				gallery.jp_carousel('getMeta', current.data('image-meta'));
-				gallery.jp_carousel('getFullSizeLink', current);
-				gallery.jp_carousel('getMap', current.data('image-meta'));
-				gallery.jp_carousel('testCommentsOpened', current.data('comments-opened'));
-				gallery.jp_carousel('getComments', {'attachment_id': current.data('attachment-id'), 'offset': 0, 'clear': true});
+			$( 'div.jp-carousel-image-meta', 'div.jp-carousel-wrap' ).html('');
+			
+			gallery.jp_carousel('getTitleDesc', { title: current.data('title'), desc: current.data('desc') } );
+			gallery.jp_carousel('getMeta', current.data('image-meta'));
+			gallery.jp_carousel('getFullSizeLink', current);
+			gallery.jp_carousel('getMap', current.data('image-meta'));
+			gallery.jp_carousel('testCommentsOpened', current.data('comments-opened'));
+			gallery.jp_carousel('getComments', {'attachment_id': current.data('attachment-id'), 'offset': 0, 'clear': true});
 
-				$('#jp-carousel-comment-post-results').slideUp();
-				
-				// $('<div />').html(sometext).text() is a trick to go to HTML to plain text (including HTML emntities decode, etc)
-				if ( current.data('caption') ) {
-					if ( $('<div />').html(current.data('caption')).text() == $('<div />').html(current.data('title')).text() )
-						$('.jp-carousel-titleanddesc-title').fadeOut('fast').empty();
-					if ( $('<div />').html(current.data('caption')).text() == $('<div />').html(current.data('desc')).text() )
-						$('.jp-carousel-titleanddesc-desc').fadeOut('fast').empty();
-					caption.html( current.data('caption') ).fadeIn('slow');
-				} else {
-					caption.fadeOut('fast').empty();
-				}
-			}, 600 );
+			$('#jp-carousel-comment-post-results').slideUp();
+			
+			// $('<div />').html(sometext).text() is a trick to go to HTML to plain text (including HTML emntities decode, etc)
+			if ( current.data('caption') ) {
+				if ( $('<div />').html(current.data('caption')).text() == $('<div />').html(current.data('title')).text() )
+					$('.jp-carousel-titleanddesc-title').fadeOut('fast').empty();
+				if ( $('<div />').html(current.data('caption')).text() == $('<div />').html(current.data('desc')).text() )
+					$('.jp-carousel-titleanddesc-desc').fadeOut('fast').empty();
+				caption.html( current.data('caption') ).fadeIn('slow');
+			} else {
+				caption.fadeOut('fast').empty();
+			}
 
 		},
 
@@ -681,8 +687,9 @@ jQuery(document).ready(function($) {
 		},
 
 		texturize : function(text) {
-				text = text.replace("'", '&#8217;').replace('&#039;', '&#8217;').replace(/[\u2019]/, '&#8217;');
-				text = text.replace('"', '&#8221;').replace('&#034;', '&#8221;').replace('&quot;', '&#8221;').replace(/[\u201D]/, '&#8221;');
+				text = text.replace(/'/g, '&#8217;').replace(/&#039;/g, '&#8217;').replace(/[\u2019]/g, '&#8217;');
+				text = text.replace(/"/g, '&#8221;').replace(/&#034;/g, '&#8221;').replace(/&quot;/g, '&#8221;').replace(/[\u201D]/g, '&#8221;');
+				text = text.replace(/([\w]+)=&#[\d]+;(.+?)&#[\d]+;/g, '$1="$2"'); // untexturize allowed HTML tags params double-quotes
 				return $.trim(text);
 		},
 
@@ -705,7 +712,9 @@ jQuery(document).ready(function($) {
 					src = gallery.jp_carousel('selectBestImageSize', {
 						orig_file   : src,
 						orig_width  : orig_size.width,
+						orig_height : orig_size.height,
 						max_width   : max.width,
+						max_height  : max.height,
 						medium_file : medium_file,
 						large_file  : large_file
 					});
@@ -783,18 +792,22 @@ jQuery(document).ready(function($) {
 			var medium_size       = args.medium_file.replace(/^https?:\/\/.+-([\d]+x[\d]+)\..+$/, '$1'),
 				medium_size_parts = (medium_size != args.medium_file) ? medium_size.split('x') : [args.orig_width, 0],
 				medium_width      = parseInt( medium_size_parts[0], 10 ),
+				medium_height     = parseInt( medium_size_parts[1], 10 ),
 				large_size        = args.large_file.replace(/^https?:\/\/.+-([\d]+x[\d]+)\..+$/, '$1'),
 				large_size_parts  = (large_size != args.large_file) ? large_size.split('x') : [args.orig_width, 0],
-				large_width       = parseInt( large_size_parts[0], 10 );
+				large_width       = parseInt( large_size_parts[0], 10 ),
+				large_height      = parseInt( large_size_parts[1], 10 );
 		
 			// Give devices with a higher devicePixelRatio higher-res images (Retina display = 2, Android phones = 1.5, etc)
-			if ('undefined' != typeof window.devicePixelRatio && window.devicePixelRatio > 1)
-				args.max_width = args.max_width * window.devicePixelRatio;
+			if ('undefined' != typeof window.devicePixelRatio && window.devicePixelRatio > 1) {
+				args.max_width  = args.max_width * window.devicePixelRatio;
+				args.max_height = args.max_height * window.devicePixelRatio;
+			}
 
-			if ( medium_width >= args.max_width )
+			if ( medium_width >= args.max_width || medium_height >= args.max_height )
 				return args.medium_file;
 
-			if ( large_width >= args.max_width )
+			if ( large_width >= args.max_width || large_height >= args.max_height )
 				return args.large_file;
 
 			return args.orig_file;
@@ -926,6 +939,8 @@ jQuery(document).ready(function($) {
 				$ul.append( '<li><h5>' + jetpackCarouselStrings[key] + '</h5>' + val + '</li>' );
 			});
 
+			$( 'div.jp-carousel-image-meta', 'div.jp-carousel-wrap' )
+				.append( $( buttons ) );
 
 			$( 'div.jp-carousel-image-meta', 'div.jp-carousel-wrap' )
 				.append( $ul );
@@ -977,8 +992,10 @@ jQuery(document).ready(function($) {
 
 		testCommentsOpened: function( opened ) {
 			if ( 1 == parseInt( opened, 10 ) ) {
+					$('.jp-carousel-buttons').fadeIn('fast');
 				commentForm.fadeIn('fast');
 			} else {
+					$('.jp-carousel-buttons').fadeOut('fast');
 				commentForm.fadeOut('fast');
 			}
 		},
@@ -1115,6 +1132,8 @@ jQuery(document).ready(function($) {
 
 	// register the event listener for staring the gallery
 	$( document.body ).on( 'click', 'div.gallery', function(e) {
+		if ( $(e.target).parent().hasClass('gallery-caption') )
+			return;
 		e.preventDefault();
 		$(this).jp_carousel('open', {start_index: $(this).find('.gallery-item').index($(e.target).parents('.gallery-item'))});
 	});

@@ -86,12 +86,14 @@ class Jetpack_Carousel {
 		do_action( 'jp_carousel_thumbnails_shown' );
 
 		if ( $this->first_run ) {
-			if ( ! has_action( 'wp_enqueue_scripts', 'register_spin_scripts' ) ) {
-				wp_enqueue_script( 'spin', plugins_url( 'spin.js', __FILE__ ), false, '1.2.4' );
-				wp_enqueue_script( 'jquery.spin', plugins_url( 'jquery.spin.js', __FILE__ ) , array( 'jquery', 'spin' ) );
+			if ( !wp_script_is( 'spin', 'registered' ) ) {
+				wp_register_script( 'spin', plugins_url( 'spin.js', __FILE__ ), false, '1.2.4' );
+			}
+			if ( !wp_script_is( 'jquery.spin', 'registered' ) ) {
+				wp_register_script( 'jquery.spin', plugins_url( 'jquery.spin.js', __FILE__ ) , array( 'jquery', 'spin' ) );
 			}
 
-			wp_enqueue_script( 'jetpack-carousel', plugins_url( 'jetpack-carousel.js', __FILE__ ), array( 'jquery' ), $this->asset_version( '20120629' ), true );
+			wp_enqueue_script( 'jetpack-carousel', plugins_url( 'jetpack-carousel.js', __FILE__ ), array( 'jquery.spin' ), $this->asset_version( '20120629' ), true );
 
 			// Note: using  home_url() instead of admin_url() for ajaxurl to be sure  to get same domain on wpcom when using mapped domains (also works on self-hosted)
 			// Also: not hardcoding path since there is no guarantee site is running on site root in self-hosted context.
@@ -105,9 +107,10 @@ class Jetpack_Carousel {
 				'display_exif'         => $this->test_1or0_option( get_option( 'carousel_display_exif' ), true ),
 				'display_geo'          => $this->test_1or0_option( get_option( 'carousel_display_geo' ), true ),
 				'background_color'     => $this->carousel_background_color_sanitize( get_option( 'carousel_background_color' ) ),
+				'comment'              => __( 'Comment', 'jetpack' ),
 				'post_comment'         => __( 'Post Comment', 'jetpack' ),
 				'loading_comments'     => __( 'Loading Comments...', 'jetpack' ),
-				'download_original'    => __( 'View full size <span class="photo-size">{0}<span class="photo-size-times">&times;</span>{1}</span>', 'jetpack' ),
+				'download_original'    => sprintf( __( 'View full size <span class="photo-size">%1$s<span class="photo-size-times">&times;</span>%2$s</span>', 'jetpack' ), '{0}', '{1}' ),
 				'no_comment_text'      => __( 'Please be sure to submit some text with your comment.', 'jetpack' ),
 				'no_comment_email'     => __( 'Please provide an email address to comment.', 'jetpack' ),
 				'no_comment_author'    => __( 'Please provide your name to comment.', 'jetpack' ),
