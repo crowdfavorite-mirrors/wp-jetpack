@@ -5,7 +5,7 @@
  * Plugin URI: http://wordpress.org/extend/plugins/jetpack/
  * Description: Bring the power of the WordPress.com cloud to your self-hosted WordPress. Jetpack enables you to connect your blog to a WordPress.com account to use the powerful features normally only available to WordPress.com users.
  * Author: Automattic
- * Version: 1.5
+ * Version: 1.7
  * Author URI: http://jetpack.me
  * License: GPL2+
  * Text Domain: jetpack
@@ -17,8 +17,10 @@ define( 'JETPACK__API_VERSION', 1 );
 define( 'JETPACK__MINIMUM_WP_VERSION', '3.2' );
 defined( 'JETPACK_CLIENT__AUTH_LOCATION' ) or define( 'JETPACK_CLIENT__AUTH_LOCATION', 'header' );
 defined( 'JETPACK_CLIENT__HTTPS' ) or define( 'JETPACK_CLIENT__HTTPS', 'AUTO' );
-define( 'JETPACK__VERSION', '1.5' );
+define( 'JETPACK__VERSION', '1.7' );
 define( 'JETPACK__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+defined( 'JETPACK__GLOTPRESS_LOCALES_PATH' ) or define( 'JETPACK__GLOTPRESS_LOCALES_PATH', JETPACK__PLUGIN_DIR . 'locales.php' );
+
 /*
 Options:
 jetpack_options (array)
@@ -53,6 +55,7 @@ class Jetpack {
 		'twitter-widget' => array( 'wickett-twitter-widget/wickett-twitter-widget.php', 'Wickett Twitter Widget' ),
 		'after-the-deadline' => array( 'after-the-deadline/after-the-deadline.php', 'After The Deadline' ),
 		'contact-form' => array( 'grunion-contact-form/grunion-contact-form.php', 'Grunion Contact Form' ),
+		'custom-css' => array( 'safecss/safecss.php', 'WordPress.com Custom CSS' ),
 	);
 
 	var $capability_translations = array(
@@ -142,8 +145,10 @@ class Jetpack {
 		$this->sync = new Jetpack_Sync;
 
 		if ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST && isset( $_GET['for'] ) && 'jetpack' == $_GET['for'] ) {
+			@ini_set( 'display_errors', false ); // Display errors can cause the XML to be not well formed.
+
 			require_once dirname( __FILE__ ) . '/class.jetpack-xmlrpc-server.php';
-			$this->xmlrpc_server = new Jetpack_XMLRPC_Server( $GLOBALS['wp_xmlrpc_server'] );
+			$this->xmlrpc_server = new Jetpack_XMLRPC_Server();
 
 			// Don't let anyone authenticate
 			remove_all_filters( 'authenticate' );
@@ -174,6 +179,18 @@ class Jetpack {
 
 		add_action( 'wp_ajax_jetpack-check-news-subscription', array( $this, 'check_news_subscription' ) );
 		add_action( 'wp_ajax_jetpack-subscribe-to-news', array( $this, 'subscribe_to_news' ) );
+
+		add_action( 'wp_enqueue_scripts', array( $this, 'devicepx' ) );
+		add_action( 'customize_controls_enqueue_scripts', array( $this, 'devicepx' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'devicepx' ) );
+	}
+
+	/**
+	 * Device Pixels support
+	 * This improves the resolution of gravatars and wordpress.com uploads on hi-res and zoomed browsers.
+	 */
+	function devicepx() {
+		wp_enqueue_script( 'devicepx', ( is_ssl() ? 'https' : 'http' ) . '://s0.wp.com/wp-content/js/devicepx-jetpack.js', array(), gmdate('oW'), true );
 	}
 
 	/**
@@ -632,6 +649,7 @@ class Jetpack {
 			// Add special cases here for modules to avoid auto-activation
 			switch ( $module ) {
 			case 'comments' :
+			case 'carousel' :
 				continue;
 			default :
 				$return[] = $module;
@@ -1075,6 +1093,16 @@ p {
 		if ( $is_active ) {
 			// Artificially throw errors in certain whitelisted cases during plugin activation
 			add_action( 'activate_plugin', array( $this, 'throw_error_on_activate_plugin' ) );
+
+			// Add retina images hotfix to admin
+			global $wp_db_version;
+			if ( $wp_db_version > 19470  ) {
+				// WP 3.4.x
+				// TODO will need to add && $wp_db_version < xxxxx when 3.5 comes out.
+				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_retina_scripts' ) );
+				// /wp-admin/customize.php omits the action above.
+				add_action( 'customize_controls_enqueue_scripts', array( $this, 'enqueue_retina_scripts' ) );
+			}
 		}
 	}
 
@@ -1156,7 +1184,7 @@ p {
 			$title = __( 'Jetpack', 'jetpack' );
 		}
 
-		$hook = add_menu_page( 'Jetpack', $title, 'manage_options', 'jetpack', array( $this, 'admin_page' ), '' );
+		$hook = add_menu_page( 'Jetpack', $title, 'manage_options', 'jetpack', array( $this, 'admin_page' ), 'div' );
 
 		add_action( "load-$hook", array( $this, 'admin_page_load' ) );
 
@@ -1239,9 +1267,21 @@ p {
 
 	function admin_menu_css() { ?>
 		<style type="text/css" id="jetpack-menu-css">
-			#toplevel_page_jetpack .wp-menu-image img { visibility: hidden; }
-			#toplevel_page_jetpack .wp-menu-image { background: url( <?php echo plugins_url( basename( dirname( __FILE__ ) ) . '/_inc/images/jp-icon.png' ) ?> ) 0 90% no-repeat; }
-			#toplevel_page_jetpack.current .wp-menu-image, #toplevel_page_jetpack.wp-has-current-submenu .wp-menu-image, #toplevel_page_jetpack:hover .wp-menu-image { background-position: top left; }
+			#toplevel_page_jetpack .wp-menu-image { 
+				background: url( <?php echo plugins_url( basename( dirname( __FILE__ ) ) . '/_inc/images/menuicon-sprite.png' ) ?> ) 0 90% no-repeat; 
+			}
+			/* Retina Jetpack Menu Icon */
+			@media only screen and (-moz-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5) {
+				#toplevel_page_jetpack .wp-menu-image { 
+					background: url( <?php echo plugins_url( basename( dirname( __FILE__ ) ) . '/_inc/images/menuicon-sprite-2x.png' ) ?> ) 0 90% no-repeat;
+					background-size:30px 64px;
+				}
+			}
+			#toplevel_page_jetpack.current .wp-menu-image, 
+			#toplevel_page_jetpack.wp-has-current-submenu .wp-menu-image, 
+			#toplevel_page_jetpack:hover .wp-menu-image { 
+				background-position: top left; 
+			}
 		</style><?php
 	}
 
@@ -1270,7 +1310,7 @@ p {
 
 	function admin_styles() {
 		global $wp_styles;
-		wp_enqueue_style( 'jetpack', plugins_url( basename( dirname( __FILE__ ) ) . '/_inc/jetpack.css' ), false, JETPACK__VERSION . '-20111115' );
+		wp_enqueue_style( 'jetpack', plugins_url( basename( dirname( __FILE__ ) ) . '/_inc/jetpack.css' ), false, JETPACK__VERSION . '-20120701' );
 		$wp_styles->add_data( 'jetpack', 'rtl', true );
 	}
 
@@ -1283,6 +1323,9 @@ p {
 		add_action( 'admin_footer', array( $this, 'do_stats' ) );
 	}
 
+	function enqueue_retina_scripts() {
+		wp_enqueue_style( 'jetpack-retina', plugins_url( basename( dirname( __FILE__ ) ) . '/_inc/jetpack-retina.css' ), false, JETPACK__VERSION . '-20120730' );
+	}
 
 	function plugin_action_links( $actions ) {
 		return array_merge(
@@ -1309,7 +1352,7 @@ p {
 				<div class="jetpack-text-container">
 					<h4>
 						<?php if ( 1 == Jetpack::get_option( 'activated' ) ) : ?>
-							<p><?php _e( '<strong>Your Jetpack is almost ready</strong> &#8211; A connection to WordPress.com is needed to enabled features like Comments, Stats, Contact Forms, and Subscriptions. Connect now to get fueled up!', 'jetpack' ); ?></p>
+							<p><?php _e( '<strong>Your Jetpack is almost ready</strong> &#8211; A connection to WordPress.com is needed to enable features like Comments, Stats, Contact Forms, and Subscriptions. Connect now to get fueled up!', 'jetpack' ); ?></p>
 						<?php else : ?>
 							<p><?php _e( '<strong>Jetpack is installed</strong> and ready to bring awesome, WordPress.com cloud-powered features to your site.', 'jetpack' ) ?></p>
 						<?php endif; ?>
@@ -2063,12 +2106,6 @@ p {
 					"jetpack_activate-$module"
 				);
 			}
-			$file = Jetpack::get_module_path( $module );
-			$png = str_replace( '.php', '.png', $file );
-			if ( is_readable( dirname( __FILE__ ) . '/_inc/images/icons/' . basename( $png ) ) )
-				$module_img = plugins_url( basename( dirname( __FILE__ ) ) . '/_inc/images/icons/' . basename( $png ) );
-			else
-				$module_img = plugins_url( basename( dirname( __FILE__ ) ) . '/_inc/images/module-blank.png' );
 
 			if ( $counter % 4 == 0 ) {
 				$classes = $css . ' jetpack-newline';
@@ -2100,7 +2137,6 @@ p {
 				<h3><?php echo $module_data['name']; ?></h3>
 				<div class="jetpack-module-description">
 						<div class="module-image">
-							<img src="<?php echo esc_url( $module_img ); ?>" align="right" width="71" height="45" />
 							<p><span class="module-image-badge"><?php echo $badge_text; ?></span><span class="module-image-free" style="display: none"><?php echo $free_text; ?></span></p>
 						</div>
 
@@ -2547,6 +2583,11 @@ p {
 	}
 
 	function staticize_subdomain( $url ) {
+		$host = parse_url( $url, PHP_URL_HOST );
+		if ( !preg_match( '/.?(?:wordpress|wp)\.com$/', $host ) ) {
+			return $url;
+		}
+
 		if ( is_ssl() ) {
 			return preg_replace( '|https?://[^/]++/|', 'https://s-ssl.wordpress.com/', $url );
 		}
