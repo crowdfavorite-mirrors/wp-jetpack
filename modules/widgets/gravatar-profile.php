@@ -1,5 +1,14 @@
 <?php
 /**
+ * Register the widget for use in Appearance -> Widgets
+ */
+add_action( 'widgets_init', 'jetpack_gravatar_profile_widget_init' );
+
+function jetpack_gravatar_profile_widget_init() {
+	register_widget( 'Jetpack_Gravatar_Profile_Widget' );
+}
+
+/**
  * Display a widgetized version of your Gravatar Profile
  * http://blog.gravatar.com/2010/03/26/gravatar-profiles/
  */
@@ -24,7 +33,7 @@ class Jetpack_Gravatar_Profile_Widget extends WP_Widget {
 				echo $args['before_widget'];
 				if ( ! empty( $title ) )
 					echo $args['before_title'] . $title . $args['after_title'];
-				echo '<p>' . sprintf( __( 'You need to select what to show in this <a href="%s">Gravatar Profile widget</a>.' ), admin_url( 'widgets.php' ) ) . '</p>';
+				echo '<p>' . sprintf( __( 'You need to select what to show in this <a href="%s">Gravatar Profile widget</a>.', 'jetpack' ), admin_url( 'widgets.php' ) ) . '</p>';
 				echo $args['after_widget'];
 			}
 			return;
@@ -45,9 +54,16 @@ class Jetpack_Gravatar_Profile_Widget extends WP_Widget {
 				array(),
 				'20120711'
 			);
-			
+
+			wp_enqueue_style(
+				'gravatar-card-services',
+				is_ssl() ? 'https://secure.gravatar.com/css/services.css' : 'http://s.gravatar.com/css/services.css',
+				array(),
+				defined( 'GROFILES__CACHE_BUSTER' ) ? GROFILES__CACHE_BUSTER : gmdate( 'YW' )
+			);
+
 			?>
-			<img src="<?php echo esc_url( $gravatar_url ); ?>" class="grofile-thumbnail no-grav" />
+			<img src="<?php echo esc_url( $gravatar_url ); ?>" class="grofile-thumbnail no-grav" style="max-width: 100%;" />
 			<div class="grofile-meta">
 				<h4><a href="<?php echo esc_url( $profile['profileUrl'] ); ?>"><?php echo esc_html( $profile['displayName'] ); ?></a></h4>
 				<p><?php echo esc_html( wp_kses( $profile['aboutMe'], array() ) ); ?></p>
@@ -63,7 +79,7 @@ class Jetpack_Gravatar_Profile_Widget extends WP_Widget {
 				
 			?>
 			
-			<h4><a href="<?php echo esc_url( $profile['profileUrl'] ); ?>" class="grofile-full-link"><?php esc_html_e( 'View Full Profile &rarr;' ); ?></a></h4>
+			<h4><a href="<?php echo esc_url( $profile['profileUrl'] ); ?>" class="grofile-full-link"><?php esc_html_e( 'View Full Profile &rarr;', 'jetpack' ); ?></a></h4>
 					
 			<?php
 

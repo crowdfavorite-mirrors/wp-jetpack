@@ -1,6 +1,15 @@
 <?php
 
 /**
+ * Register the widget for use in Appearance -> Widgets
+ */
+add_action( 'widgets_init', 'jetpack_facebook_likebox_init' );
+
+function jetpack_facebook_likebox_init() {
+	register_widget( 'WPCOM_Widget_Facebook_LikeBox' );
+}
+
+/**
  * Facebook Like Box widget class
  * Display a Facebook Like Box as a widget
  * http://developers.facebook.com/docs/reference/plugins/like-box/
@@ -29,7 +38,7 @@ class WPCOM_Widget_Facebook_LikeBox extends WP_Widget {
 		if ( empty( $like_args['href'] ) || ! $this->is_valid_facebook_url( $like_args['href'] ) ) {
 			if ( current_user_can('edit_theme_options') ) {
 				echo $before_widget;
-				echo '<p>' . sprintf( __( 'It looks like your Facebook URL is incorrectly configured. Please check it in your <a href="%s">widget settings</a>.' ), admin_url( 'widgets.php' ) ) . '</p>';
+				echo '<p>' . sprintf( __( 'It looks like your Facebook URL is incorrectly configured. Please check it in your <a href="%s">widget settings</a>.', 'jetpack' ), admin_url( 'widgets.php' ) ) . '</p>';
 				echo $after_widget;
 			}
 			echo '<!-- Invalid Facebook Page URL -->';
