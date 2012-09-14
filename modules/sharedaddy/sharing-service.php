@@ -6,6 +6,11 @@ define( 'WP_SHARING_PLUGIN_VERSION', '0.3.1' );
 
 class Sharing_Service {
 	private $global = false;
+	var $default_sharing_label = '';
+
+	public function __construct() {
+		$this->default_sharing_label = __( 'Share this:', 'jetpack' );
+	}
 
 	/**
 	 * Gets a generic list of all services, without any config
@@ -193,7 +198,7 @@ class Sharing_Service {
 		// Defaults
 		$options['global'] = array(
 			'button_style'  => 'icon-text',
-			'sharing_label' => __( 'Share this:', 'jetpack' ),
+			'sharing_label' => $this->default_sharing_label,
 			'open_links'    => 'same',
 			'show'          => array( 'post', 'page' ),
 			'custom'        => isset( $options['global']['custom'] ) ? $options['global']['custom'] : array()
@@ -205,8 +210,13 @@ class Sharing_Service {
 		if ( isset( $data['button_style'] ) && in_array( $data['button_style'], array( 'icon-text', 'icon', 'text', 'official' ) ) )
 			$options['global']['button_style'] = $data['button_style'];
 
-		if ( isset( $data['sharing_label'] ) )
-			$options['global']['sharing_label'] = trim( wp_kses( stripslashes( $data['sharing_label'] ), array() ) );
+		if ( isset( $data['sharing_label'] ) ) {
+			if ( $this->default_sharing_label === $data['sharing_label'] ) {
+				$options['global']['sharing_label'] = false;
+			} else {
+				$options['global']['sharing_label'] = trim( wp_kses( stripslashes( $data['sharing_label'] ), array() ) );
+			}
+		}
 
 		if ( isset( $data['open_links'] ) && in_array( $data['open_links'], array( 'new', 'same' ) ) )
 			$options['global']['open_links'] = $data['open_links'];
@@ -264,6 +274,11 @@ class Sharing_Service {
 				break;
 			}
 		}
+
+		if ( false === $this->global['sharing_label'] ) {
+			$this->global['sharing_label'] = $this->default_sharing_label;
+		}
+
 		return $this->global;
 	}
 	
@@ -375,16 +390,38 @@ class Sharing_Post_Total {
 	}
 }
 
+function sharing_register_post_for_share_counts( $post_id ) {
+	global $jetpack_sharing_counts;
+
+	if ( ! isset( $jetpack_sharing_counts ) || ! is_array( $jetpack_sharing_counts ) )
+		$jetpack_sharing_counts = array();
+
+	$jetpack_sharing_counts[ (int) $post_id ] = get_permalink( $post_id );
+}
+
 function sharing_add_footer() {
-	if ( apply_filters( 'sharing_js', true ) )
+	global $jetpack_sharing_counts;
+
+	if ( apply_filters( 'sharing_js', true ) ) {
+
+		if ( is_array( $jetpack_sharing_counts ) && count( $jetpack_sharing_counts ) ) :
+?>
+
+	<script type="text/javascript">
+		WPCOM_sharing_counts = <?php echo json_encode( array_flip( $jetpack_sharing_counts ) ); ?>
+	</script>
+<?php
+		endif;
+
 		wp_print_scripts( 'sharing-js' );
+	}
 	
 	$sharer = new Sharing_Service();
 	$enabled = $sharer->get_blog_services();
 	foreach ( array_merge( $enabled['visible'], $enabled['hidden'] ) AS $service ) {
 		$service->display_footer();
 	}
-} 
+}
 
 function sharing_add_header() {
 	$sharer = new Sharing_Service();
@@ -422,6 +459,12 @@ function sharing_display( $text = '' ) {
 	}
 
 	if ( in_array( 'get_the_excerpt', (array) $wp_current_filter ) ) {
+		return $text;
+	}
+
+	if ( is_attachment() && in_array( 'the_excerpt', (array) $wp_current_filter ) ) {
+		// Many themes run the_excerpt() conditionally on an attachment page, then run the_content().
+		// We only want to output the sharing buttons once.  Let's stick with the_content().
 		return $text;
 	}
 

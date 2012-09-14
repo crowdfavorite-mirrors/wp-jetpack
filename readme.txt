@@ -1,9 +1,9 @@
 === Jetpack by WordPress.com ===
-Contributors: automattic, apeatling, beaulebens, hugobaeta, joen, mdawaffe, andy, designsimply, hew, westi, eoigal, tmoorewp, matt
+Contributors: automattic, apeatling, beaulebens, hugobaeta, joen, mdawaffe, andy, designsimply, hew, westi, eoigal, tmoorewp, matt, pento
 Tags: WordPress.com, statistics, stats, views, tweets, twitter, widget, gravatar, hovercards, profile, equations, latex, math, maths, youtube, shortcode, archives, audio, blip, bliptv, dailymotion, digg, flickr, googlevideo, google, googlemaps, kyte, kytetv, livevideo, redlasso, rockyou, rss, scribd, slide, slideshare, soundcloud, vimeo, shortlinks, wp.me, subscriptions
 Requires at least: 3.2
 Tested up to: 3.4.1
-Stable tag: 1.6.1
+Stable tag: 1.7
 
 Supercharge your WordPress site with powerful features previously only available to WordPress.com users.
 
@@ -27,6 +27,7 @@ Features include:
 * Your readers can easily share your posts via email or their favorite social networks.  Previously provided by the [Sharedaddy](http://wordpress.org/extend/plugins/sharedaddy/) WordPress plugin.
 * Your writing will improve thanks to After the Deadline, an artificial intelligence based spell, style, and grammar checker.  Previously provided by the [After the Deadline](http://wordpress.org/extend/plugins/after-the-deadline/) WordPress plugin.
 * With Carousel active, any standard WordPress galleries you have embedded in posts or pages will launch a gorgeous full-screen photo browsing experience with comments and EXIF metadata.
+* A CSS editor that lets you customize your site design without modifying your theme.
 * and *many* more to come!
 
 Note: The stats portion of Jetpack uses Quantcast to enhance its data.
@@ -59,14 +60,15 @@ Use [shortcodes](http://support.wordpress.com/shortcodes/) to embed your media. 
 * [[dailymotion]](http://support.wordpress.com/videos/dailymotion/)
 * [[digg]](http://support.wordpress.com/digg/)
 * [[flickr]](http://support.wordpress.com/videos/flickr-video/)
+* [[googlemaps]](http://en.support.wordpress.com/google-maps/)
 * [[googlevideo]](http://support.wordpress.com/videos/google-video/)
 * [[polldaddy]](http://support.polldaddy.com/wordpress-shortcodes/)
 * [[scribd]](http://support.wordpress.com/scribd/)
 * [[slideshare]](http://support.wordpress.com/slideshows/slideshare/)
 * [[soundcloud]](http://support.wordpress.com/audio/soundcloud-audio-player/)
+* [[videopress]](http://support.wordpress.com/videopress/)
 * [[vimeo]](http://support.wordpress.com/videos/vimeo/)
 * [[youtube]](http://support.wordpress.com/videos/youtube/)
-* [[googlemaps]](http://en.support.wordpress.com/google-maps/)
 
 == Screenshots ==
 
@@ -76,8 +78,32 @@ Use [shortcodes](http://support.wordpress.com/shortcodes/) to embed your media. 
 4. Gravatar Hovercards settings.
 5. Spelling and Grammar demo.
 6. Gallery Carousel.
+7. CSS Editor
 
 == Changelog ==
+
+= 1.7 =
+* Enhancement: CSS Editor: Customize your site's design without modifying your theme.
+* Enhancement: Comments: Submit the comment within the iframe.  No more full page load to jetpack.wordpress.com.
+* Enhancement: Sharing: Share counts for Twitter, Facebook, LinkedIn
+* Enhancement: Sharing: Improve styling
+* Enhancement: Sharing: Add support for ReCaptcha
+* Enhancement: Sharing: Better extensability through filters
+* Enhancement: Widgets: Twitter: Attempt to reduce errors by storing a long lasting copy of the data. Thanks, kareldonk :)
+* Regression Fix: Sharing: Properly store and display the sharing label option's default value.
+* Bug Fix: Contact Form: remove worse-than-useless nonce.
+* Bug Fix: Subscriptions: remove worse-than-useless nonce.
+* Bug Fix: Sharing: Don't show sharing buttons twice on attachment pages.
+* Bug Fix: Sharing: Increase width of Spanish Like button for Facebook.
+* Bug Fix: Sharing: Use the correct URL to the throbber.
+* Bug Fix: Stats: Fix notice about undefined variable $alt
+* Bug Fix: Subscriptions: Make Subscriptions module obey the settings of the Settngs -> Discussion checkboxes for Follow Blog/Comments
+* Bug Fix: Shortcodes: VideoPress: Compatibility with the latest version of VideoPress
+* Bug Fix: Shortcodes: Audio: Include JS File for HTML5 audio player
+* Bug Fix: Hovercards: Improve cache handling.
+* Bug Fix: Widgets: Gravatar Profle: Correctly display service icons in edge cases.
+* Bug Fix: Widgets: Gravatar Profle: Prevent ugly "flash" of too-large image when page first loads on some sites
+* Bug Fix: Carousel: CSS Compatibility with more themes.
 
 = 1.6.1 =
 * Bug Fix: Prevent Fatal error under certain conditions in sharing module
