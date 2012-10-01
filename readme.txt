@@ -1,9 +1,9 @@
 === Jetpack by WordPress.com ===
-Contributors: automattic, apeatling, beaulebens, hugobaeta, joen, mdawaffe, andy, designsimply, hew, westi, eoigal, tmoorewp, matt, pento
+Contributors: automattic, apeatling, beaulebens, hugobaeta, joen, mdawaffe, andy, designsimply, hew, westi, eoigal, tmoorewp, matt, pento, cfinke, daniloercoli, chellycat
 Tags: WordPress.com, statistics, stats, views, tweets, twitter, widget, gravatar, hovercards, profile, equations, latex, math, maths, youtube, shortcode, archives, audio, blip, bliptv, dailymotion, digg, flickr, googlevideo, google, googlemaps, kyte, kytetv, livevideo, redlasso, rockyou, rss, scribd, slide, slideshare, soundcloud, vimeo, shortlinks, wp.me, subscriptions
 Requires at least: 3.2
-Tested up to: 3.4.1
-Stable tag: 1.7
+Tested up to: 3.4.2
+Stable tag: 1.8.1
 
 Supercharge your WordPress site with powerful features previously only available to WordPress.com users.
 
@@ -28,6 +28,8 @@ Features include:
 * Your writing will improve thanks to After the Deadline, an artificial intelligence based spell, style, and grammar checker.  Previously provided by the [After the Deadline](http://wordpress.org/extend/plugins/after-the-deadline/) WordPress plugin.
 * With Carousel active, any standard WordPress galleries you have embedded in posts or pages will launch a gorgeous full-screen photo browsing experience with comments and EXIF metadata.
 * A CSS editor that lets you customize your site design without modifying your theme.
+* A mobile theme that automatically streamlines your site for visitors on mobile devices.
+* Mobile push notifications for new comments via WordPress mobile apps. 
 * and *many* more to come!
 
 Note: The stats portion of Jetpack uses Quantcast to enhance its data.
@@ -79,8 +81,33 @@ Use [shortcodes](http://support.wordpress.com/shortcodes/) to embed your media. 
 5. Spelling and Grammar demo.
 6. Gallery Carousel.
 7. CSS Editor
+8. Mobile Theme
 
 == Changelog ==
+
+= 1.8.1 =
+* Bug Fix: Stats: Fixed a bug preventing some users from viewing stats.
+* Bug Fix: Mobile Theme: Fixed some disabled toolbar buttons.
+* Bug Fix: Top Posts widget: Fixed a bug preventing the usage of the Top Posts widget.
+* Bug Fix: Mobile Theme: Fixed a bug that broke some sites when the Subscriptions module was not enabled and the Mobile Theme module was enabled.
+* Bug Fix: Mobile Theme: Made mobile app promos in the Mobile Theme footer opt-in.
+* Bug Fix: Twitter Widget: A fix to prevent malware warnings.
+* Bug Fix: Mobile Theme: Fixed a bug that caused errors for some users with custom header images.
+
+= 1.8 =
+* Enhancement: Mobile Theme: Automatically serve a slimmed down version of your site to users on mobile devices.
+* Enhancement: Multiuser: Allow multiple users to link their accounts to WordPress.com accounts.
+* Enhancement: Custom CSS: Added support for object-fit, object-position, transition, and filter properties.
+* Enhancement: Twitter Widget: Added Follow button
+* Enhancement: Widgets: Added Top Posts and Pages widget
+* Enhancement: Mobile Push Notifications: Added support for mobile push notifications on new comments.
+* Enhancement: VideoPress: Shortcodes now support the HD option, for default HD playback.
+* Bug Fix: Twitter Widget: Fixed tweet permalinks in the Twitter widget
+* Bug Fix: Custom CSS: @import rules and external images are no longer stripped out of custom CSS
+* Bug Fix: Custom CSS: Fixed warnings and notices displayed in debug mode
+* Bug Fix: Sharing: Fixed double-encoding of image URLs
+* Bug Fix: Sharing: Fix Google +1 button HTML validation issues (again :))
+* Bug Fix: Gravatar Profile Widget: Reduce size of header margins
 
 = 1.7 =
 * Enhancement: CSS Editor: Customize your site's design without modifying your theme.

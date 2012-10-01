@@ -697,13 +697,14 @@ class Share_Facebook extends Sharing_Source {
 			// Locale-specific widths/overrides
 			$widths = array(
 				'bg_BG' => 120,
-				'de_DE' => 100,
+				'de_DE' => 120,
 				'da_DK' => 120,
-				'es_ES' => 110,
+				'es_ES' => 122,
 				'es_LA' => 110,
 				'fi_FI' => 100,
 				'it_IT' => 100,
 				'ja_JP' => 100,
+				'nl_NL' => 130,
 				'ru_RU' => 128,
 			);
 
@@ -828,7 +829,7 @@ class Share_GooglePlus1 extends Sharing_Source {
 
 	public function get_display( $post ) {
 		// Smart or not, return the G+ button
-		return '<div class="googleplus1_button"><g:plusone size="medium" callback="sharing_plusone" href="' . esc_url( $this->get_share_url( $post->ID ) ) . '"></g:plusone></div>';
+		return '<div class="googleplus1_button"><div class="g-plusone" data-size="medium" data-callback="sharing_plusone" data-href="' . esc_url( $this->get_share_url( $post->ID ) ) . '"></div></div>';
 	}
 	
 	public function display_preview() {
@@ -1126,7 +1127,7 @@ class Share_Pinterest extends Sharing_Source {
 					continue;
 				}
 				else {
-					$image = $img['src'];
+					$image = htmlspecialchars_decode( $img['src'] );
 					break;
 				}
 			}
