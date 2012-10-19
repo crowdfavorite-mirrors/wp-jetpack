@@ -3,7 +3,7 @@ Contributors: automattic, apeatling, beaulebens, hugobaeta, joen, mdawaffe, andy
 Tags: WordPress.com, statistics, stats, views, tweets, twitter, widget, gravatar, hovercards, profile, equations, latex, math, maths, youtube, shortcode, archives, audio, blip, bliptv, dailymotion, digg, flickr, googlevideo, google, googlemaps, kyte, kytetv, livevideo, redlasso, rockyou, rss, scribd, slide, slideshare, soundcloud, vimeo, shortlinks, wp.me, subscriptions
 Requires at least: 3.2
 Tested up to: 3.4.2
-Stable tag: 1.8.1
+Stable tag: 1.8.2
 
 Supercharge your WordPress site with powerful features previously only available to WordPress.com users.
 
@@ -84,6 +84,13 @@ Use [shortcodes](http://support.wordpress.com/shortcodes/) to embed your media. 
 8. Mobile Theme
 
 == Changelog ==
+
+= 1.8.2 =
+* Bug Fix: Subscriptions: Fix a bug where subscriptions were not sent for posts and comments written by some authors.
+* Bug Fix: Widgets: Fix CSS that was uglifying some themes (like P2).
+* Bug Fix: Widgets: Improve Top Posts and Pages styling.
+* Bug Fix: Custom CSS: Make the default "Welcome" message translatable.
+* Bug Fix: Fix Lithuanian translation.
 
 = 1.8.1 =
 * Bug Fix: Stats: Fixed a bug preventing some users from viewing stats.
