@@ -55,6 +55,25 @@ function migrate() {
 		// Set option so that we dont keep doing this
 		update_option( 'safecss_revision_migrated', time() );
 	}
+
+	$newest_safecss_post = get_current_revision();
+
+	if ( $newest_safecss_post ) {
+		if ( get_option( 'safecss_content_width' ) ) {
+			// Add the meta to the post and the latest revision.
+			update_post_meta( $newest_safecss_post['ID'], 'content_width', get_option( 'safecss_content_width' ) );
+			update_metadata( 'post', $newest_safecss_post['ID'], 'content_width', get_option( 'safecss_content_width' ) );
+
+			delete_option( 'safecss_content_width' );
+		}
+
+		if ( get_option( 'safecss_add' ) ) {
+			update_post_meta( $newest_safecss_post['ID'], 'custom_css_add', get_option( 'safecss_add' ) );
+			update_metadata( 'post', $newest_safecss_post['ID'], 'custom_css_add', get_option( 'safecss_add' ) );
+
+			delete_option( 'safecss_add' );
+		}
+	}
 }
 
 function safecss_revision_redirect( $redirect ) {
@@ -102,16 +121,49 @@ function safecss_revision_post_link( $post_link, $post_id, $context ) {
 add_filter( 'get_edit_post_link', 'safecss_revision_post_link', 10, 3 );
 
 /**
- * Get the safecss record
+ * Get the published custom CSS post.
  *
  * @return array
  */
 function get_safecss_post() {
-	$safecss_post = array();
-	$a = array_shift( get_posts( array( 'posts_per_page' => 1, 'post_type' => 'safecss', 'post_status' => 'publish', 'orderby' => 'date', 'order' => 'DESC' ) ) );
-	if ( $a )
-		$safecss_post = get_object_vars( $a ); // needed for php 5.3
-	return $safecss_post;
+	$custom_css_post_id = custom_css_post_id();
+
+	if ( $custom_css_post_id )
+		return get_post( $custom_css_post_id, ARRAY_A );
+
+	return array();
+}
+
+/**
+ * Get the post ID of the published custom CSS post.
+ *
+ * @return int|bool The post ID if it exists; false otherwise.
+ */
+function custom_css_post_id() {
+	$custom_css_post_id = wp_cache_get( 'custom_css_post_id' );
+
+	if ( false === $custom_css_post_id ) {
+		$custom_css_post = array_shift( get_posts( array(
+			'posts_per_page' => 1,
+			'post_type' => 'safecss',
+			'post_status' => 'publish',
+			'orderby' => 'date',
+			'order' => 'DESC'
+		) ) );
+
+		if ( $custom_css_post )
+			$custom_css_post_id = $custom_css_post->ID;
+		else
+			$custom_css_post_id = 0;
+
+		// Save post_id=0 to note that no safecss post exists.
+		wp_cache_set( 'custom_css_post_id', $custom_css_post_id );
+	}
+
+	if ( ! $custom_css_post_id )
+		return false;
+
+	return $custom_css_post_id;
 }
 
 /**
@@ -145,21 +197,25 @@ function get_current_revision() {
  *
  * @param string $css
  * @param bool $is_preview
- * @return bool
+ * @return bool|int If nothing was saved, returns false. If a post
+ *                  or revision was saved, returns the post ID.
  */
 function save_revision( $css, $is_preview = false ) {
 	$safecss_post = get_safecss_post();
 
+	$compressed_css = custom_css_minify( $css );
+
 	// If null, there was no original safecss record, so create one
 	if ( null == $safecss_post ) {
 		if ( ! $css )
-			return true;
+			return false;
 
 		$post = array();
 		$post['post_content'] = $css;
 		$post['post_title'] = 'safecss';
 		$post['post_status'] = 'publish';
 		$post['post_type'] = 'safecss';
+		$post['post_content_filtered'] = $compressed_css;
 
 		// Set excerpt to current theme, for display in revisions list
 		if ( function_exists( 'wp_get_theme' ) ) {
@@ -172,11 +228,13 @@ function save_revision( $css, $is_preview = false ) {
 
 		// Insert the CSS into wp_posts
 		$post_id = wp_insert_post( $post );
-		return true;
+		wp_cache_set( 'custom_css_post_id', $post_id );
+		return $post_id;
 	}
 
 	// Update CSS in post array with new value passed to this function
 	$safecss_post['post_content'] = $css;
+	$safecss_post['post_content_filtered'] = $compressed_css;
 
 	// Set excerpt to current theme, for display in revisions list
 	if ( function_exists( 'wp_get_theme' ) ) {
@@ -195,24 +253,34 @@ function save_revision( $css, $is_preview = false ) {
 
 	// Do not update post if we are only saving a preview
 	if ( false === $is_preview ) {
-		wp_update_post( $safecss_post );
+		$post_id = wp_update_post( $safecss_post );
+		wp_cache_set( 'custom_css_post_id', $post_id );
+		return $post_id;
 	}
 	else if ( !defined( 'DOING_MIGRATE' ) ) {
-		_wp_put_post_revision( $safecss_post );
+		return _wp_put_post_revision( $safecss_post );
 	}
 }
 
 function safecss_skip_stylesheet() {
 	if ( custom_css_is_customizer_preview() )
 		return false;
-	else if ( safecss_is_preview() )
-		return (bool) ( get_option('safecss_preview_add') == 'no' );
-	else
-		return (bool) ( get_option('safecss_add') == 'no' );
+	else {
+		if ( safecss_is_preview() ) {
+			$safecss_post = get_current_revision();
+
+			return (bool) ( get_option('safecss_preview_add') == 'no' || get_post_meta( $safecss_post['ID'], 'custom_css_add', true ) == 'no' );
+		}
+		else {
+			$custom_css_post_id = custom_css_post_id();
+
+			return (bool) ( get_option('safecss_add') == 'no' || ( $custom_css_post_id && get_post_meta( $custom_css_post_id, 'custom_css_add', true ) == 'no' ) );
+		}
+	}
 }
 
 function safecss_init() {
-	define( 'SAFECSS_USE_ACE', apply_filters( 'safecss_use_ace', true ) );
+	define( 'SAFECSS_USE_ACE', ! jetpack_is_mobile() && ! Jetpack_User_Agent_Info::is_ipad() && apply_filters( 'safecss_use_ace', true ) );
 
   	// Register safecss as a custom post_type
   	// Explicit capability definitions are largely unnecessary because the posts are manipulated in code via an options page, managing CSS revisions does check the capabilities, so let's ensure that the proper caps are checked.
@@ -274,14 +342,17 @@ function safecss_init() {
 		safecss_class();
 		$csstidy = new csstidy();
 		$csstidy->optimise = new safecss($csstidy);
-		$csstidy->set_cfg('remove_bslash', false);
-		$csstidy->set_cfg('compress_colors', false);
-		$csstidy->set_cfg('compress_font-weight', false);
-		$csstidy->set_cfg('discard_invalid_properties', true);
-		$csstidy->set_cfg('merge_selectors', false);
-		$csstidy->set_cfg('remove_last_;', false);
-		$csstidy->set_cfg('css_level', 'CSS3.0');
-		$csstidy->set_cfg('template', dirname( __FILE__ ) . '/csstidy/wordpress-standard.tpl');
+
+		$csstidy->set_cfg( 'remove_bslash',              false );
+		$csstidy->set_cfg( 'compress_colors',            false );
+		$csstidy->set_cfg( 'compress_font-weight',       false );
+		$csstidy->set_cfg( 'optimise_shorthands',        0 );
+		$csstidy->set_cfg( 'remove_last_;',              false );
+		$csstidy->set_cfg( 'case_properties',            false );
+		$csstidy->set_cfg( 'discard_invalid_properties', true );
+		$csstidy->set_cfg( 'css_level',                  'CSS3.0' );
+		$csstidy->set_cfg( 'preserve_css',               true );
+		$csstidy->set_cfg( 'template',                   dirname( __FILE__ ) . '/csstidy/wordpress-standard.tpl' );
 
 		$css = $orig = stripslashes($_POST['safecss']);
 
@@ -319,14 +390,14 @@ function safecss_init() {
 			$add_to_existing = 'no';
 
 		if ( $_POST['action'] == 'preview' || safecss_is_freetrial() ) {
-			$is_preview = true;
 			// Save the CSS
-			save_revision( $css, $is_preview );
+			$safecss_revision_id = save_revision( $css, true );
 
 			// Cache Buster
 			update_option('safecss_preview_rev', intval( get_option('safecss_preview_rev') ) + 1);
-			update_option('safecss_preview_add', $add_to_existing );
-			update_option('safecss_preview_content_width', $custom_content_width);
+
+			update_metadata( 'post', $safecss_revision_id, 'custom_css_add', $add_to_existing );
+			update_metadata( 'post', $safecss_revision_id, 'content_width', $custom_content_width );
 
 			if ( $_POST['action'] == 'preview' ) {
 				wp_safe_redirect( add_query_arg( 'csspreview', 'true', get_option('home') ) );
@@ -337,10 +408,16 @@ function safecss_init() {
 		}
 
 		// Save the CSS
-		save_revision( $css );
+		$safecss_post_id = save_revision( $css );
+
+		$safecss_post_revision = get_current_revision();
+
 		update_option( 'safecss_rev', intval( get_option( 'safecss_rev' ) ) + 1 );
-		update_option( 'safecss_add', $add_to_existing );
-		update_option( 'safecss_content_width', $custom_content_width );
+
+		update_post_meta( $safecss_post_id, 'custom_css_add', $add_to_existing );
+		update_post_meta( $safecss_post_id, 'content_width', $custom_content_width );
+		update_metadata( 'post', $safecss_post_revision['ID'], 'custom_css_add', $add_to_existing );
+		update_metadata( 'post', $safecss_post_revision['ID'], 'content_width', $custom_content_width );
 
 		add_action('admin_notices', 'safecss_saved');
 	}
@@ -363,7 +440,7 @@ function safecss_is_freetrial() {
 	return apply_filters( 'safecss_is_freetrial', false );
 }
 
-function safecss() {
+function safecss( $compressed = false ) {
 	$default_css = apply_filters( 'safecss_get_css_error', false );
 
 	if ( $default_css !== false )
@@ -374,13 +451,13 @@ function safecss() {
 	if ( 'safecss' == $option ) {
 		if ( get_option( 'safecss_revision_migrated' ) ) {
 			$safecss_post = get_safecss_post();
-			$css = $safecss_post['post_content'];
+			$css = ( $compressed && $safecss_post['post_content_filtered'] ) ? $safecss_post['post_content_filtered'] : $safecss_post['post_content'];
 		} else {
 			$current_revision = get_current_revision();
 			if ( false === $current_revision ) {
 				$css = '';
 			} else {
-				$css = $current_revision['post_content'];
+				$css = ( $compressed && $current_revision['post_content_filtered'] ) ? $current_revision['post_content_filtered'] : $current_revision['post_content'];
 			}
 		}
 
@@ -392,11 +469,11 @@ function safecss() {
 			}
 		}
 	}
-
-	if ( 'safecss_preview' == $option ) {
+	else if ( 'safecss_preview' == $option ) {
 		$safecss_post = get_current_revision();
 		$css = $safecss_post['post_content'];
 		$css = stripslashes( $css );
+		$css = custom_css_minify( $css );
 	}
 
 	$css = str_replace( array( '\\\00BB \\\0020', '\0BB \020', '0BB 020' ), '\00BB \0020', $css );
@@ -423,7 +500,7 @@ function safecss() {
 function safecss_print() {
 	do_action( 'safecss_print_pre' );
 
-	echo safecss();
+	echo safecss( true );
 }
 
 function safecss_style() {
@@ -438,15 +515,22 @@ function safecss_style() {
 	if ( custom_css_is_customizer_preview() )
 		return;
 
+	$css    = '';
 	$option = safecss_is_preview() ? 'safecss_preview' : 'safecss';
 
 	if ( 'safecss' == $option ) {
 		if ( get_option( 'safecss_revision_migrated' ) ) {
 			$safecss_post = get_safecss_post();
-			$css = $safecss_post['post_content'];
+
+			if ( ! empty( $safecss_post['post_content'] ) ) {
+				$css = $safecss_post['post_content'];
+			}
 		} else {
 			$current_revision = get_current_revision();
-			$css = $current_revision['post_content'];
+
+			if ( ! empty( $current_revision['post_content'] ) ) {
+				$css = $current_revision['post_content'];
+			}
 		}
 
 		// Fix for un-migrated Custom CSS
@@ -460,7 +544,10 @@ function safecss_style() {
 
 	if ( 'safecss_preview' == $option ) {
 		$safecss_post = get_current_revision();
-		$css = $safecss_post['post_content'];
+
+		if ( !empty( $safecss_post['post_content'] ) ) {
+			$css = $safecss_post['post_content'];
+		}
 	}
 
 	$css = str_replace( array( '\\\00BB \\\0020', '\0BB \020', '0BB 020' ), '\00BB \0020', $css );
@@ -678,8 +765,8 @@ textarea#safecss {
 }
 #safecssform .button,
 #safecssform .button-primary {
-	border-radius: 2em;
 	padding: 7px 12px;
+	margin-left: 6px;
 }
 <?php
 if ( defined( 'SAFECSS_USE_ACE' ) && SAFECSS_USE_ACE ) :
@@ -763,7 +850,7 @@ function safecss_admin() {
 ?>
 <div class="wrap">
 	<?php do_action( 'custom_design_header' ); ?>
-	<div id="poststuff" class="has-right-sidebar">
+	<div id="poststuff" class="has-right-sidebar metabox-holder">
 	<h2><?php _e( 'CSS Stylesheet Editor', 'jetpack' ); ?></h2>
 	<p class="css-support"><?php echo apply_filters( 'safecss_intro_text', __( 'New to CSS? Start with a <a href="http://www.htmldog.com/guides/cssbeginner/">beginner tutorial</a>. Questions?
 	Ask in the <a href="http://wordpress.org/support/forum/themes-and-templates">Themes and Templates forum</a>.', 'jetpack' ) ); ?></p>
@@ -832,10 +919,12 @@ function custom_css_meta_box() {
 		$current_theme = get_current_theme();
 	}
 
+	$safecss_post = get_current_revision();
+
 	?>
 	<p class="css-settings">
-		<label><input type="radio" name="add_to_existing" value="true" <?php checked( get_option( 'safecss_add' ) != 'no' ); ?> /> <?php printf( __( 'Add my CSS to <strong>%s&apos;s</strong> CSS stylesheet.', 'jetpack' ), $current_theme ); ?></label><br />
-		<label><input type="radio" name="add_to_existing" value="false" <?php checked( get_option( 'safecss_add' ) == 'no' ); ?> /> <?php printf( __( 'Don&apos;t use <strong>%s&apos;s</strong> CSS, and replace everything with my own CSS.', 'jetpack' ), $current_theme ); ?></label>
+		<label><input type="radio" name="add_to_existing" value="true" <?php checked( get_post_meta( $safecss_post['ID'], 'custom_css_add', true ) != 'no' ); ?> /> <?php printf( __( 'Add my CSS to <strong>%s&apos;s</strong> CSS stylesheet.', 'jetpack' ), $current_theme ); ?></label><br />
+		<label><input type="radio" name="add_to_existing" value="false" <?php checked( get_post_meta( $safecss_post['ID'], 'custom_css_add', true ) == 'no' ); ?> /> <?php printf( __( 'Don&apos;t use <strong>%s&apos;s</strong> CSS, and replace everything with my own CSS.', 'jetpack' ), $current_theme ); ?></label>
 	</p>
 	<p><?php printf( __( '<a href="%s">View the original stylesheet</a> for the %s theme. Use this as a reference and do not copy and paste all of it into the CSS Editor.', 'jetpack' ), apply_filters( 'safecss_theme_stylesheet_url', get_stylesheet_uri() ), $current_theme ); ?></p>
 	<?php
@@ -937,10 +1026,20 @@ function disable_safecss_style() {
 	remove_filter( 'stylesheet_uri', 'safecss_style_filter' );
 }
 
+/**
+ * Reset all aspects of Custom CSS on a theme switch so that changing
+ * themes is a sure-fire way to get a clean start.
+ */
 function custom_css_reset() {
-	save_revision( '' );
+	$safecss_post_id = save_revision( '' );
+	$safecss_revision = get_current_revision();
+
 	update_option( 'safecss_rev', intval( get_option( 'safecss_rev' ) ) + 1 );
-	update_option( 'safecss_add', 'yes' );
+
+	update_post_meta( $safecss_post_id, 'custom_css_add', 'yes' );
+	update_post_meta( $safecss_post_id, 'content_width', false );
+	update_metadata( 'post', $safecss_revision['ID'], 'custom_css_add', 'yes' );
+	update_metadata( 'post', $safecss_revision['ID'], 'content_width', false );
 }
 
 add_action( 'switch_theme', 'custom_css_reset' );
@@ -951,3 +1050,47 @@ function custom_css_is_customizer_preview() {
 
 	return false;
 }
+
+function custom_css_minify( $css ) {
+	if ( ! $css )
+		return '';
+
+	safecss_class();
+	$csstidy = new csstidy();
+	$csstidy->optimise = new safecss( $csstidy );
+
+	$csstidy->set_cfg( 'remove_bslash',              false );
+	$csstidy->set_cfg( 'compress_colors',            true );
+	$csstidy->set_cfg( 'compress_font-weight',       true );
+	$csstidy->set_cfg( 'remove_last_;',              true );
+	$csstidy->set_cfg( 'case_properties',            true );
+	$csstidy->set_cfg( 'discard_invalid_properties', true );
+	$csstidy->set_cfg( 'css_level',                  'CSS3.0' );
+	$csstidy->set_cfg( 'template', 'highest');
+	$csstidy->parse( $css );
+
+	return $csstidy->print->plain();
+}
+
+/**
+ * When restoring a SafeCSS post revision, also copy over the
+ * content_width and custom_css_add post metadata.
+ */
+function custom_css_restore_revision( $_post_id, $_revision_id ) {
+	$_post = get_post( $_post_id );
+
+	if ( 'safecss' != $_post->post_type )
+		return;
+
+	$safecss_revision = get_current_revision();
+
+	$content_width = get_post_meta( $_revision_id, 'content_width', true );
+	$custom_css_add = get_post_meta( $_revision_id, 'custom_css_add', true );
+
+	update_metadata( 'post', $safecss_revision['ID'], 'content_width', $content_width );
+	update_metadata( 'post', $safecss_revision['ID'], 'custom_css_add', $custom_css_add );
+	update_post_meta( $_post->ID, 'content_width', $content_width );
+	update_post_meta( $_post->ID, 'custom_css_add', $custom_css_add );
+}
+
+add_action( 'wp_restore_post_revision', 'custom_css_restore_revision', 10, 2 );

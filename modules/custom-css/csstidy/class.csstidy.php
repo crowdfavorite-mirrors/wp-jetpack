@@ -577,7 +577,8 @@ class csstidy {
 							$this->at .= $this->_unicode($string, $i);
 						}
 						// fix for complicated media, i.e @media screen and (-webkit-min-device-pixel-ratio:1.5)
-						elseif (in_array($string{$i}, array('(', ')', ':', '.'))) {
+						// '/' is included for ratios in Opera: (-o-min-device-pixel-ratio: 3/2)
+						elseif (in_array($string{$i}, array('(', ')', ':', '.', '/'))) {
 							$this->at .= $string{$i};
 						}
 					} else {
@@ -654,6 +655,9 @@ class csstidy {
 					} else {
 						$lastpos = strlen($this->selector) - 1;
 						if ($lastpos == -1 || !( (ctype_space($this->selector{$lastpos}) || csstidy::is_token($this->selector, $lastpos) && $this->selector{$lastpos} === ',') && ctype_space($string{$i}))) {
+							$this->selector .= $string{$i};
+						}
+						else if (ctype_space($string{$i}) && $this->get_cfg('preserve_css') && !$this->get_cfg('merge_selectors')) {
 							$this->selector .= $string{$i};
 						}
 					}

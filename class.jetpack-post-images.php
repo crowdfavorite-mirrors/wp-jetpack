@@ -62,7 +62,6 @@ class Jetpack_PostImages {
 					'src'        => $url,
 					'src_width'  => $meta['width'],
 					'src_height' => $meta['height'],
-					'thumb'      => add_query_arg( $meta['width'] >= $meta['height'] ? 'w' : 'h', 200, $url ), // scale the bigger dimension
 					'href'       => $permalink,
 				);
 			}
@@ -98,9 +97,6 @@ class Jetpack_PostImages {
 		// Find all the galleries
 		preg_match_all( '/' . get_shortcode_regex() . '/s', $post->post_content, $gallery_matches, PREG_SET_ORDER );
 
-		// We'll staticize this later
-		// $imgpress_url = get_blogaddress_by_id( $GLOBALS['wpdb']->blogid ) . 'imgpress';
-
 		foreach ( $gallery_matches as $gallery_match ) {
 			$gallery = do_shortcode_tag( $gallery_match );
 
@@ -131,14 +127,7 @@ class Jetpack_PostImages {
 				$images[] = array(
 					'type'  => 'image',
 					'from'  => 'gallery',
-	/*				Facebook doesn't like imgpress for some reason.
-					'thumb' => staticize_subdomain( add_query_arg( array(
-						'url' => urlencode( $raw_src ),
-						'fit' => '200,200',
-					), $imgpress_url ) ),
-	*/
 					'src'   => $raw_src,
-					'thumb' => add_query_arg( 'w', 200, $raw_src ), // Stick to normal width adjustment for now.  FB seems to deal with portrait images (which are technically too big at width=90) OK.
 					'href'  => $permalink, // $href,
 				);
 			}
@@ -167,7 +156,7 @@ class Jetpack_PostImages {
 		if ( !$post_images )
 			return false;
 
-		$permalink = get_permalink( $post->ID );
+		$permalink = get_permalink( $post_id );
 
 		$images = array();
 
@@ -187,9 +176,26 @@ class Jetpack_PostImages {
 				'src'        => $url,
 				'src_width'  => $meta['width'],
 				'src_height' => $meta['height'],
-				'thumb'      => add_query_arg( $meta['width'] >= $meta['height'] ? 'w' : 'h', 200, $url ),
 				'href'       => $permalink,
 			);
+		}
+
+		/*
+		* We only want to pass back attached images that were actually inserted.
+		* We can load up all the images found in the HTML source and then
+		* compare URLs to see if an image is attached AND inserted.
+		*/
+		$html_images = array();
+		$html_images = self::from_html( get_post( $post_id ) );
+		$inserted_images = array();
+
+		foreach( $html_images as $html_image ) {
+			$src = parse_url( $html_image['src'] );
+			$inserted_images[] = $src['scheme'] . '://' . $src['host'] . $src['path']; // strip off any query strings
+		}
+		foreach( $images as $i => $image ) {
+			if ( !in_array( $image['src'], $inserted_images ) )
+				unset( $images[$i] );
 		}
 
 		return $images;
@@ -203,6 +209,11 @@ class Jetpack_PostImages {
 	 */
 	static function from_thumbnail( $post_id, $width = 200, $height = 200 ) {
 		$images = array();
+
+		if ( !function_exists( 'get_post_thumbnail_id' ) ) {
+			return $images;
+		}
+
 		$thumb = get_post_thumbnail_id( $post_id );
 
 		if ( $thumb ) {
@@ -224,7 +235,6 @@ class Jetpack_PostImages {
 				'src'        => $url,
 				'src_width'  => $meta['width'],
 				'src_height' => $meta['height'],
-				'thumb'      => add_query_arg( $meta['width'] >= $meta['height'] ? 'w' : 'h', 200, $url ),
 				'href'       => get_permalink( $thumb ),
 			) );
 		}
@@ -246,7 +256,7 @@ class Jetpack_PostImages {
 				return $images;
 		}
 
-		preg_match_all( '!<img.*src="([^"]+)".*/>!iUs', $html, $matches );
+		preg_match_all( '!<img.*src="([^"]+)".*/?>!iUs', $html, $matches );
 		if ( !empty( $matches[1] ) ) {
 			foreach ( $matches[1] as $match ) {
 				if ( stristr( $match, '/smilies/' ) )
@@ -256,7 +266,6 @@ class Jetpack_PostImages {
 					'type'  => 'image',
 					'from'  => 'html',
 					'src'   => html_entity_decode( $match ),
-					'thumb' => html_entity_decode( $match ), // For now, leaving it as fullsize
 					'href'  => '', // No link to apply to these. Might potentially parse for that as well, but not for now
 				);
 			}
@@ -290,7 +299,6 @@ class Jetpack_PostImages {
 			'src'        => $url,
 			'src_width'  => $size,
 			'src_height' => $size,
-			'thumb'      => $url, // For now, leaving it as fullsize
 			'href'       => $permalink,
 		) );
 	}
@@ -337,7 +345,6 @@ class Jetpack_PostImages {
 			'src'        => $url,
 			'src_width'  => $size,
 			'src_height' => $size,
-			'thumb'      => $url, // For now, leaving it as fullsize
 			'href'       => $permalink,
 		) );
 	}
@@ -376,12 +383,16 @@ class Jetpack_PostImages {
 		// Figure out which image to attach to this post.
 		$media = false;
 
+		$media = apply_filters( 'jetpack_images_pre_get_images', $media, $post_id, $args );
+		if ( $media )
+			return $media;
+
 		$defaults = array(
-			'width' => 200,  // Required minimum width (if possible to determine)
-			'height' => 200, // Required minimum height (if possible to determine)
-			'avatar_size' => 96,
+			'width'               => 200,  // Required minimum width (if possible to determine)
+			'height'              => 200, // Required minimum height (if possible to determine)
+			'avatar_size'         => 96,
 			'fallback_to_avatars' => false,
-			'gravatar_default' => false,
+			'gravatar_default'    => false,
 		);
 		$args = wp_parse_args( $args, $defaults );
 
@@ -401,6 +412,6 @@ class Jetpack_PostImages {
 				$media = self::from_gravatar( $post_id, $args['avatar_size'], $args['gravatar_default'] );
 		}
 
-		return $media;
+		return apply_filters( 'jetpack_images_get_images', $media, $post_id, $args );
 	}
 }

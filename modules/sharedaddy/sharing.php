@@ -24,8 +24,8 @@ class Sharing_Admin {
 	
 	public function sharing_head() {
 		wp_enqueue_script( 'sharing-js', WP_SHARING_PLUGIN_URL.'admin-sharing.js', array( 'jquery-ui-draggable', 'jquery-ui-droppable', 'jquery-ui-sortable', 'jquery-form' ), 2 );
-		wp_enqueue_style( 'sharing-admin', WP_SHARING_PLUGIN_URL.'admin-sharing.css', false, WP_SHARING_PLUGIN_VERSION );
-		wp_enqueue_style( 'sharing', WP_SHARING_PLUGIN_URL.'sharing.css', false, WP_SHARING_PLUGIN_VERSION );
+		wp_enqueue_style( 'sharing-admin', WP_SHARING_PLUGIN_URL.'admin-sharing.css', false, JETPACK__VERSION );
+		wp_enqueue_style( 'sharing', WP_SHARING_PLUGIN_URL.'sharing.css', false, JETPACK__VERSION );
 		wp_enqueue_script( 'sharing-js-fe', WP_SHARING_PLUGIN_URL . 'sharing.js', array( ), 2 );
 
 		add_thickbox();
@@ -48,6 +48,12 @@ class Sharing_Admin {
 	}
 	
 	public function subscription_menu( $user ) {
+		if ( !defined( 'IS_WPCOM' ) || !IS_WPCOM ) {
+			$active = Jetpack::get_active_modules();
+			if ( !in_array( 'publicize', $active ) && !current_user_can( 'manage_options' ) )
+				return;
+		}
+
 		add_submenu_page( 'options-general.php', __( 'Sharing Settings', 'jetpack' ), __( 'Sharing', 'jetpack' ), 'publish_posts', 'sharing', array( &$this, 'management_page' ) );
 	}
 	
@@ -63,7 +69,7 @@ class Sharing_Admin {
 	public function ajax_new_service() {
 		if ( isset( $_POST['_wpnonce'] ) && isset( $_POST['sharing_name'] ) && isset( $_POST['sharing_url'] ) && isset( $_POST['sharing_icon'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'sharing-new_service' ) ) {
 			$sharer = new Sharing_Service();
-			if ( $service = $sharer->new_service( $_POST['sharing_name'], $_POST['sharing_url'], $_POST['sharing_icon'] ) ) {
+			if ( $service = $sharer->new_service( stripslashes( $_POST['sharing_name'] ), stripslashes( $_POST['sharing_url'] ), stripslashes( $_POST['sharing_icon'] ) ) ) {
 				$this->output_service( $service->get_id(), $service );
 				echo '<!--->';
 				$service->button_style = 'icon-text';
@@ -106,13 +112,7 @@ class Sharing_Admin {
 	public function output_preview( $service ) {
 		$klasses = array( 'advanced', 'preview-item' );
 		
-		if (
-				'googleplus1' == $service->shortname
-			||
-				$service->button_style != 'text'
-			||
-				$service->has_custom_button_style()
-		) {
+		if ( $service->button_style != 'text' || $service->has_custom_button_style() ) {
 			$klasses[] = 'preview-'.$service->get_class();
 			$klasses[] = 'share-'.$service->get_class();
 			

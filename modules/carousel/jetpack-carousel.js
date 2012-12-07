@@ -393,6 +393,13 @@ jQuery(document).ready(function($) {
 	};
 
 	var methods = {
+		testForData: function(gallery) {
+			gallery = $( gallery ); // make sure we have it as a jQuery object.
+			if ( ! gallery.length || undefined == gallery.data( 'carousel-extra' ) )
+				return false;
+			return true;
+		},
+
 		open: function(options) {
 			var settings = {
 				'items_selector' : ".gallery-item [data-attachment-id], .tiled-gallery-item [data-attachment-id]",
@@ -752,9 +759,10 @@ jQuery(document).ready(function($) {
 					title           = src_item.attr('title') || '',
 					description     = src_item.data('image-description') || '',
 					caption         = src_item.parents('dl').find('dd.gallery-caption').html() || '',
-					src				= src_item.data('gallery-src') || '',
+					src		= src_item.data('gallery-src') || '',
 					medium_file     = src_item.data('medium-file') || '',
-					large_file      = src_item.data('large-file') || '';
+					large_file      = src_item.data('large-file') || '',
+					orig_file	= src_item.data('orig-file') || '';
 
 				var tiledCaption = src_item.parents('div.tiled-gallery-item').find('div.tiled-gallery-caption').html();
 				if ( tiledCaption )
@@ -786,6 +794,7 @@ jQuery(document).ready(function($) {
 						.data('image-meta', image_meta)
 						.data('medium-file', medium_file)
 						.data('large-file', large_file)
+						.data('orig-file', orig_file)
 						.jp_carousel('fitSlide', false);
 
 				
@@ -852,7 +861,7 @@ jQuery(document).ready(function($) {
 
 		shutterSpeed: function(d) {
 			if (d >= 1)
-				Math.round(d) + 's';
+				return Math.round(d) + 's';
 			var df = 1, top = 1, bot = 1;
 			var limit = 1e5; //Increase for greater precision.
 			while (df != d && limit-- > 0) {
@@ -968,7 +977,7 @@ jQuery(document).ready(function($) {
 		getFullSizeLink: function(current) {
 			if(!current || !current.data)
 				return false;
-			var original  = current.data('src').replace(/\?.+$/, ''),
+			var original  = current.data('orig-file').replace(/\?.+$/, ''),
 				origSize  = current.data('orig-size').split(','),
 				permalink = $( '<a>'+gallery.jp_carousel('format', {'text': jetpackCarouselStrings.download_original, 'replacements': origSize})+'</a>' )
 					.addClass( 'jp-carousel-image-download' )
@@ -1151,6 +1160,8 @@ jQuery(document).ready(function($) {
 
 	// register the event listener for staring the gallery
 	$( document.body ).on( 'click', 'div.gallery,div.tiled-gallery', function(e) {
+		if ( ! $(this).jp_carousel( 'testForData', e.currentTarget ) )
+			return;
 		if ( $(e.target).parent().hasClass('gallery-caption') )
 			return;
 		e.preventDefault();
@@ -1161,6 +1172,9 @@ jQuery(document).ready(function($) {
 	if ( document.location.hash && document.location.hash.match(/jp-carousel-(\d+)/) ) {
 		$(document).ready(function(){
 			var gallery = $('div.gallery, div.tiled-gallery'), index = -1, n = document.location.hash.match(/jp-carousel-(\d+)/);
+			
+			if ( ! $(this).jp_carousel( 'testForData', gallery ) )
+				return;
 
 			n = parseInt(n[1], 10);
 

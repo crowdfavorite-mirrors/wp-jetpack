@@ -123,6 +123,8 @@ class Jetpack_User_Agent_Info {
 	   		return 'blackberry';
 	   	elseif ( $this->is_WindowsPhone7() )
 	   		return 'win7';
+	   	elseif ( $this->is_windows_phone_8() )
+	   		return 'winphone8';
 	   	elseif ( $this->is_opera_mini() )
 	   		return 'opera-mini';
 		elseif ( $this->is_opera_mini_dumb() )
@@ -184,7 +186,7 @@ class Jetpack_User_Agent_Info {
    		return $this->_platform;
    	}
 
-    if ( strpos( $this->useragent, 'windows phone os 7' ) !== false ) {
+    if ( strpos( $this->useragent, 'windows phone' ) !== false ) {
    		$this->_platform = self::PLATFORM_WINDOWS;
    	}
    	elseif ( strpos( $this->useragent, 'windows ce' ) !== false ) {
@@ -249,6 +251,12 @@ class Jetpack_User_Agent_Info {
 		}
 		elseif ( $this->is_android() ) {
 			$this->matched_agent = 'android';
+			$this->isTierIphone = true;
+			$this->isTierRichCss = false;
+			$this->isTierGenericMobile = false;
+		}
+		elseif ( $this->is_windows_phone_8() ) {
+			$this->matched_agent = 'winphone8';
 			$this->isTierIphone = true;
 			$this->isTierRichCss = false;
 			$this->isTierGenericMobile = false;
@@ -367,7 +375,19 @@ class Jetpack_User_Agent_Info {
 		return $this->isTierRichCss;
 	}
 
-
+	// Detects if the user is using a tablet.
+	// props Corey Gilmore, BGR.com
+	function is_tablet() {
+		return ( 0 // never true, but makes it easier to manage our list of tablet conditions
+				||  self::is_ipad()
+				||  self::is_android_tablet()
+				||  self::is_blackberry_tablet()
+				||  self::is_kindle_fire()
+				||  self::is_MaemoTablet()
+				||  self::is_TouchPad()
+		);
+	}
+	
 	/*
 	 *  Detects if the current UA is the default iPhone or iPod Touch Browser.
 	 *
@@ -439,37 +459,50 @@ class Jetpack_User_Agent_Info {
 			return false;
 	}
 	
+	
 	/*
 	 *  Detects if the current UA is Twitter for iPhone
+	 *  
 	 * Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_5 like Mac OS X; nb-no) AppleWebKit/533.17.9 (KHTML, like Gecko) Mobile/8L1 Twitter for iPhone
+	 * Mozilla/5.0 (iPhone; CPU iPhone OS 5_1_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Mobile/9B206 Twitter for iPhone
+	 * 
 	 */
 	function is_twitter_for_iphone( ) {
 		if ( empty( $_SERVER['HTTP_USER_AGENT'] ) )
 			return false;
-
+			
 		$ua = strtolower( $_SERVER['HTTP_USER_AGENT'] );
 
+		if ( strpos( $ua, 'ipad' ) !== false )
+			return false;
+		
 		if ( strpos( $ua, 'twitter for iphone' ) !== false )
 			return true;
 		else
 			return false;
 	}
-
+	
 	/*
 	 * Detects if the current UA is Twitter for iPad
-	 * Mozilla/5.0 (iPad; U; CPU OS 4_3_5 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Mobile/8L1 Twitter for iPad
+	 * 
+	 * Old version 4.X - Mozilla/5.0 (iPad; U; CPU OS 4_3_5 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Mobile/8L1 Twitter for iPad
+	 * Ver 5.0 or Higher - Mozilla/5.0 (iPad; CPU OS 5_1_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Mobile/9B206 Twitter for iPhone
+	 *  
 	 */
 	function is_twitter_for_ipad( ) {
 		if ( empty( $_SERVER['HTTP_USER_AGENT'] ) )
 			return false;
-
+			
 		$ua = strtolower( $_SERVER['HTTP_USER_AGENT'] );
 
 		if ( strpos( $ua, 'twitter for ipad' ) !== false )
 			return true;
+		elseif( strpos( $ua, 'ipad' ) !== false && strpos( $ua, 'twitter for iphone' ) !== false )
+			return true;
 		else
 			return false;
 	}
+	
 
 	/*
 	 * Detects if the current UA is Facebook for iPhone
@@ -691,6 +724,23 @@ class Jetpack_User_Agent_Info {
 		}
 	}
 
+	/*
+	 * Detects if the current browser is a Windows Phone 8 device.
+	 * ex: Mozilla/5.0 (compatible; MSIE 10.0; Windows Phone 8.0; Trident/6.0; ARM; Touch; IEMobile/10.0; <Manufacturer>; <Device> [;<Operator>])
+	 */
+	function is_windows_phone_8() {
+		if ( empty( $_SERVER['HTTP_USER_AGENT'] ) )
+			return false;
+			
+		$ua = strtolower( $_SERVER['HTTP_USER_AGENT'] );
+		if ( strpos( $ua, 'windows phone 8' ) === false ) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	
 	/*
 	 * Detects if the current browser is on a Palm device running the new WebOS. This EXCLUDES TouchPad.
 	 *
@@ -928,7 +978,6 @@ class Jetpack_User_Agent_Info {
 	/**
 	 * Detects if the current browser is the Native Android Tablet browser.
 	 * 	Assumes 'Android' should be in the user agent, but not 'mobile'
-	 *  See http://mobileprojects.wordpress.com/2011/06/15/we-received-a-request-from-cnn-to-serve/
 	 *
 	 * @return boolean true if the browser is Android and not 'mobile' otherwise false
 	 */
@@ -992,7 +1041,7 @@ class Jetpack_User_Agent_Info {
  		}
 
 
-	// Detect if user agent is the WordPress.com Windows 8 app (used for custom oauth stylesheet)
+	// Detect if user agent is the WordPress.com Windows 8 app (used ONLY on the custom oauth stylesheet)
 	function is_windows8_auth( ) {
 		if ( empty( $_SERVER['HTTP_USER_AGENT'] ) )
 			return false;
@@ -1005,6 +1054,20 @@ class Jetpack_User_Agent_Info {
 			return false;
 	}
 
+	// Detect if user agent is the WordPress.com Windows 8 app.
+	function is_wordpress_for_win8( ) {
+		if ( empty( $_SERVER['HTTP_USER_AGENT'] ) )
+			return false;
+	
+		$agent = strtolower( $_SERVER['HTTP_USER_AGENT'] );
+		$pos   = strpos( $agent, 'wp-windows8' );
+		if ( $pos !== false )
+			return true;
+		else
+			return false;
+	}
+	
+	
 	/*
 	 * is_blackberry_tablet() can be used to check the User Agent for a RIM blackberry tablet
 	 * The user agent of the BlackBerry® Tablet OS follows a format similar to the following:
@@ -1214,6 +1277,11 @@ class Jetpack_User_Agent_Info {
 			return true; //wp4webos 1.1 or higher
 
 		$app_agents = array( 'wp-android', 'wp-blackberry', 'wp-iphone', 'wp-nokia', 'wp-webos', 'wp-windowsphone' );
+		// the mobile reader on iOS has an incorrect UA when loading the reader
+		// currently it is the default one provided by the iOS framework which
+		// causes problems with 2-step-auth
+		// User-Agent	WordPress/3.1.4 CFNetwork/609 Darwin/13.0.0
+		$app_agents[] = 'wordpress/3.1';
 
 		foreach ( $app_agents as $app_agent ) {
 			if ( false !== strpos( $agent, $app_agent ) )
@@ -1222,4 +1290,38 @@ class Jetpack_User_Agent_Info {
 		return false;
 	}
 
+	static function is_bot() {
+		static $is_bot = false;
+		static $first_run = true;
+
+		if ( $first_run ) {
+			$first_run = false;
+
+		/*
+			$bot_ips = array( );
+
+			foreach ( $bot_ips as $bot_ip ) {
+				if ( $_SERVER['REMOTE_ADDR'] == $bot_ip )
+					$is_bot = true;
+			}
+		*/
+
+			$agent = strtolower( $_SERVER['HTTP_USER_AGENT'] );
+
+			$bot_agents = array(
+				'alexa', 'altavista', 'ask jeeves', 'attentio', 'baiduspider', 'bingbot', 'chtml generic', 'crawler', 'fastmobilecrawl',
+				'feedfetcher-google', 'firefly', 'froogle', 'gigabot', 'googlebot', 'googlebot-mobile', 'heritrix', 'ia_archiver', 'irlbot',
+				'infoseek', 'jumpbot', 'lycos', 'mediapartners', 'mediobot', 'motionbot', 'msnbot', 'mshots', 'openbot',
+				'pythumbnail', 'scooter', 'slurp', 'snapbot', 'spider', 'surphace scout', 'taptubot', 'technoratisnoop',
+				'teoma', 'twiceler', 'yahooseeker', 'yahooysmcm', 'yammybot',
+			);
+
+			foreach ( $bot_agents as $bot_agent ) {
+				if ( false !== strpos( $agent, $bot_agent ) )
+					$is_bot = true;
+			}
+		}
+
+		return $is_bot;
+	}
 }
