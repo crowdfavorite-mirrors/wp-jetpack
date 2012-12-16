@@ -50,6 +50,10 @@
 	}
 	// syntaxy goodness.
 	else {
+		$( '#safecss-ace, #safecss-container' ).css( 'height', 
+			Math.max( 250, $( window ).height() - $( '#safecss-container' ).offset().top - $( '#wpadminbar' ).height() )
+		);
+
 		$(global).load(loadAce);
 	}
 

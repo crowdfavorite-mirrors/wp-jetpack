@@ -2,8 +2,8 @@
 Contributors: automattic, apeatling, beaulebens, hugobaeta, Joen, mdawaffe, andy, designsimply, hew, westi, eoigal, tmoorewp, matt, pento, cfinke, daniloercoli, chellycat, gibrown, jblz, jshreve, barry, alternatekev, azaozz, ethitter, johnjamesjacoby, lancewillett, martinremy, nickmomrik, stephdau, yoavf, matveb
 Tags: WordPress.com, statistics, stats, views, tweets, twitter, widget, gravatar, hovercards, profile, equations, latex, math, maths, youtube, shortcode, archives, audio, blip, bliptv, dailymotion, digg, flickr, googlevideo, google, googlemaps, kyte, kytetv, livevideo, redlasso, rockyou, rss, scribd, slide, slideshare, soundcloud, vimeo, shortlinks, wp.me, subscriptions, notifications, notes, json, api, rest
 Requires at least: 3.2
-Tested up to: 3.4.2
-Stable tag: 2.0.2
+Tested up to: 3.5
+Stable tag: 2.0.4
 
 Supercharge your WordPress site with powerful features previously only available to WordPress.com users.
 
@@ -88,6 +88,20 @@ Use [shortcodes](http://support.wordpress.com/shortcodes/) to embed your media. 
 8. Mobile Theme
 
 == Changelog ==
+
+= 2.0.4 =
+* Bug Fix: Open Graph: Correct a bug that prevents Jetpack from being activated if the SharePress plugin isn't installed.
+
+= 2.0.3 =
+* Enhancement: Infinite Scroll: support [VideoPress](http://wordpress.org/extend/plugins/video/) plugin.
+* Enhancement: Photon: Apply to all images retrieved from the Media Library.
+* Enhancement: Photon: Retina image support.
+* Enhancement: Custom CSS: Refined editor interface.
+* Enhancement: Custom CSS: Support [Sass](http://sass-lang.com/) and [LESS](http://lesscss.org/) with built-in preprocessors.
+* Enhancement: Open Graph: Better checks for other plugins that may be loading Open Graph tags to prevent Jetpack from doubling meta tag output.
+* Bug Fix: Infinite Scroll: Respect relative image dimensions.
+* Bug Fix: Photon: Detect custom-cropped images and use those with Photon, rather than trying to use the original.
+* Bug Fix: Custom CSS: Fix for bug preventing @import from working with url()-style URLs.
 
 = 2.0.2 =
 * Bug Fix: Remove an erroneous PHP short open tag with the full tag to correct fatal errors under certain PHP configurations.

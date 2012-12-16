@@ -280,7 +280,7 @@ class The_Neverending_Home_Page {
 		add_filter( 'body_class', array( $this, 'body_class' ) );
 
 		// Add our scripts.
-		wp_enqueue_script( 'the-neverending-homepage', plugins_url( 'infinity.js', __FILE__ ), array( 'jquery' ), '20121119' );
+		wp_enqueue_script( 'the-neverending-homepage', plugins_url( 'infinity.js', __FILE__ ), array( 'jquery' ), '20121205' );
 
 		// Add our default styles.
 		wp_enqueue_style( 'the-neverending-homepage', plugins_url( 'infinity.css', __FILE__ ), array(), '20120612' );
@@ -686,7 +686,7 @@ class The_Neverending_Home_Page {
 	 *
 	 * @global $wp_query
 	 * @global $wp_the_query
-	 * @uses current_user_can, get_option, self::set_last_post_time, current_user_can, apply_filters, self::get_settings, add_filter, WP_Query, remove_filter, have_posts, wp_head, do_action, add_action, this::render, this::has_wrapper, esc_attr, wp_footer
+	 * @uses current_user_can, get_option, self::set_last_post_time, current_user_can, apply_filters, self::get_settings, add_filter, WP_Query, remove_filter, have_posts, wp_head, do_action, add_action, this::render, this::has_wrapper, esc_attr, wp_footer, sharing_register_post_for_share_counts, get_the_id
 	 * @return string or null
 	 */
 	function query() {
@@ -714,6 +714,11 @@ class The_Neverending_Home_Page {
 			'post__not_in'   => ( array ) $sticky,
 			'order'          => $order
 		) );
+
+		// By default, don't query for a specific page of a paged post object.
+		// This argument comes from merging $wp_the_query.
+		// Since IS is only used on archives, we should always display the first page of any paged content.
+		unset( $query_args['page'] );
 
 		$query_args = apply_filters( 'infinite_scroll_query_args', $query_args );
 
@@ -767,6 +772,19 @@ class The_Neverending_Home_Page {
 			ob_start();
 			wp_footer();
 			ob_end_clean();
+
+			// Loop through posts to capture sharing data for new posts loaded via Infinite Scroll
+			if ( 'success' == $results['type'] && function_exists( 'sharing_register_post_for_share_counts' ) ) {
+				global $jetpack_sharing_counts;
+
+				while( have_posts() ) {
+					the_post();
+
+					sharing_register_post_for_share_counts( get_the_ID() );
+				}
+
+				$results['postflair'] = array_flip( $jetpack_sharing_counts );
+			}
 		} else {
 			do_action( 'infinite_scroll_empty' );
 			$results['type'] = 'empty';
@@ -784,7 +802,7 @@ class The_Neverending_Home_Page {
 	 * @return string
 	 */
 	function render() {
-		while( have_posts() ) {
+		while ( have_posts() ) {
 			the_post();
 
 			get_template_part( 'content', get_post_format() );
@@ -794,11 +812,11 @@ class The_Neverending_Home_Page {
 	/**
 	 * Allow plugins to filter what archives Infinite Scroll supports
 	 *
-	 * @uses apply_filters, is_home, is_archive, self::get_settings
+	 * @uses apply_filters, current_theme_supports, is_home, is_archive, self::get_settings
 	 * @return bool
 	 */
-	private function archive_supports_infinity() {
-		return (bool) apply_filters( 'infinite_scroll_archive_supported', ( is_home() || is_archive() ), self::get_settings() );
+	public function archive_supports_infinity() {
+		return (bool) apply_filters( 'infinite_scroll_archive_supported', current_theme_supports( 'infinite-scroll' ) && ( is_home() || is_archive() ), self::get_settings() );
 	}
 
 	/**

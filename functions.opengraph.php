@@ -11,8 +11,10 @@
 add_action( 'wp_head', 'jetpack_og_tags' );
 
 function jetpack_og_tags() {
-	if ( false === apply_filters( 'jetpack_enable_open_graph', true ) )
+	if ( false === apply_filters( 'jetpack_enable_opengraph', true ) ) {
+		_deprecated_function( 'jetpack_enable_opengraph', '2.0.3', 'jetpack_enable_open_graph' );
 		return;
+	}
 
 	$og_output = "\n<!-- Jetpack Open Graph Tags -->\n";
 	$tags = array();
@@ -25,7 +27,7 @@ function jetpack_og_tags() {
 		$site_type = get_option( 'open_graph_protocol_site_type' );
 		$tags['og:type'] = ! empty( $site_type ) ? $site_type : 'blog';
 		$tags['og:title'] = get_bloginfo( 'name' );
-		$tags['og:url'] = home_url( '/' );
+		$tags['og:url'] = is_home() ? get_permalink( get_option( 'page_for_posts' ) ) : home_url( '/' );
 		$tags['og:description'] = get_bloginfo( 'description' );
 
 		// Associate a blog's root path with one or more Facebook accounts
