@@ -61,6 +61,9 @@ function jetpack_mobile_exclude() {
 	if ( defined( 'DOING_AJAX' ) && true === DOING_AJAX )
 		$exclude = false;
 
+	if ( isset( $GLOBALS['wp_customize'] ) )
+		return true;
+
 	return $exclude;
 }
 
@@ -180,8 +183,8 @@ function jetpack_mobile_theme_setup() {
 		add_action('option_template', 'jetpack_mobile_template');
 		add_action('option_stylesheet', 'jetpack_mobile_stylesheet');
 
-		if ( function_exists( 'disable_safecss_style' ) && ! get_option( 'wp_mobile_custom_css' ) )
-			add_action( 'init', 'disable_safecss_style', 11 );
+		if ( class_exists( 'Jetpack_Custom_CSS' ) && method_exists( 'Jetpack_Custom_CSS', 'disable' ) && ! get_option( 'wp_mobile_custom_css' ) )
+			add_action( 'init', array( 'Jetpack_Custom_CSS', 'disable' ), 11 );
 
 		do_action( 'mobile_setup' );
 	}
@@ -254,7 +257,7 @@ function jetpack_mobile_css_settings() {
 
 	?>
 	<div class="misc-pub-section">
-		<label><?php esc_html_e( 'Mobile-compatible:' , 'jetpack'); ?></label>
+		<label><?php esc_html_e( 'Mobile-compatible:', 'jetpack' ); ?></label>
 		<span id="mobile-css-display"><?php echo $mobile_css ? __( 'Yes', 'jetpack' ) : __( 'No', 'jetpack' ); ?></span>
 		<a class="edit-mobile-css hide-if-no-js" href="#mobile-css"><?php echo esc_html_e( 'Edit', 'jetpack' ); ?></a>
 		<div id="mobile-css-select" class="hide-if-js">

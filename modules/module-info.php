@@ -546,7 +546,7 @@ function jetpack_carousel_learn_more_button() {
 function jetpack_carousel_more_info() {
 ?>
 	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/screenshot-6.png' ) ?>" alt="<?php esc_attr_e( 'Gallery Carousel Screenshot', 'jetpack' ) ?>" width="300" height="188" />
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/carousel.png' ) ?>" alt="<?php esc_attr_e( 'Gallery Carousel Screenshot', 'jetpack' ) ?>" width="300" height="188" />
 	</div>
 
 	<h4><?php esc_html_e( 'Carousel', 'jetpack' ); ?></h4>
@@ -713,7 +713,7 @@ add_action( 'jetpack_learn_more_button_post-by-email', 'jetpack_post_by_email_mo
 function jetpack_photon_more_info() { ?>
 	<h4><?php esc_html_e( 'Photon' , 'jetpack' ); ?></h4>
 
-	<p><?php esc_html_e( "Give your site a boost by loading images in post and posts' featured images from the WordPress.com content delivery network. We cache your images and serve them from our super-fast network, reducing the burden on your web host with the click of a button.", 'jetpack' ); ?></p>
+	<p><?php esc_html_e( "Give your site a boost by loading images in posts from the WordPress.com content delivery network. We cache your images and serve them from our super-fast network, reducing the burden on your Web host with the click of a button.", 'jetpack' ); ?></p>
 <?php
 }
 add_action( 'jetpack_module_more_info_photon', 'jetpack_photon_more_info' );
@@ -729,3 +729,24 @@ function jetpack_photon_more_link() {
 }
 add_action( 'jetpack_learn_more_button_photon', 'jetpack_photon_more_link' );
 // Photon: STOP
+
+// Tiled Galleries: START
+function jetpack_tiled_gallery_more_info() { ?>
+	<h4><?php esc_html_e( 'Tiled Galleries' , 'jetpack' ); ?></h4>
+
+	<div class="jp-info-img">
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/tiled-gallery.png' ) ?>" alt="<?php esc_attr_e( 'Tiled Galleries', 'jetpack' ) ?>" width="300" height="150" />
+	</div>
+
+	<p><?php esc_html_e( 'Create elegant magazine-style mosaic layouts for your photos without having to use an external graphic editor.', 'jetpack' ); ?></p>
+	<p><?php printf( __( 'When adding a gallery to your post, you now have the option to select a layout style for your images. We\'ve added support for Rectangular, Square, and Circular galleries. By default, galleries will continue to display using the standard thumbnail grid layout. To make the rectangular layout the default for all of your site\'s galleries, head over to <a href="%s">Settings &rarr; Media</a> and check the box next to "Display all your gallery pictures in a cool mosaic."', 'jetpack' ), admin_url( 'options-media.php' ) ); ?></p>
+	<p><em><?php esc_html_e( 'Note: Images in tiled galleries require extra-special processing, so they will be served from WordPress.com\'s CDN even if the Photon module is disabled.', 'jetpack' ); ?></em></p>
+<?php
+}
+add_action( 'jetpack_module_more_info_tiled-gallery', 'jetpack_tiled_gallery_more_info' );
+
+function jetpack_tiled_gallery_more_link() {
+	echo '<a class="button-secondary more-info-link" href="#">' . __( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_action( 'jetpack_learn_more_button_tiled-gallery', 'jetpack_tiled_gallery_more_link' );
+// Tiled Galleries: STOP

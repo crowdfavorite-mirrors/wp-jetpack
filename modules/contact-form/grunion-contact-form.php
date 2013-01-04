@@ -502,26 +502,21 @@ class Grunion_Contact_Form extends Crunion_Contact_Form_Shortcode {
 	static $style = false;
 
 	function __construct( $attributes, $content = null ) {
-		global $wp_query;
+		global $post;
 
 		// Set up the default subject and recipient for this form
 		$default_to = get_option( 'admin_email' );
 		$default_subject = "[" . get_option( 'blogname' ) . "]";
-		
+
 		if ( !empty( $attributes['widget'] ) && $attributes['widget'] ) {
 			$attributes['id'] = 'widget-' . $attributes['widget'];
 
 			$default_subject = sprintf( _x( '%1$s Sidebar', '%1$s = blog name', 'jetpack' ), $default_subject );
-		} else {
-			$attributes['id'] = get_the_ID();
-
-			$post = get_post( $attributes['id'] );
-
-			if ( $post ) {
-				$default_subject = sprintf( _x( '%1$s %2$s', '%1$s = blog name, %2$s = post title', 'jetpack' ), $default_subject, Grunion_Contact_Form_Plugin::strip_tags( $post->post_title ) );
-				$post_author = get_userdata( $post->post_author );
-				$default_to = $post_author->user_email;
-			} 
+		} else if ( $post ) {
+			$attributes['id'] = $post->ID;
+			$default_subject = sprintf( _x( '%1$s %2$s', '%1$s = blog name, %2$s = post title', 'jetpack' ), $default_subject, Grunion_Contact_Form_Plugin::strip_tags( $post->post_title ) );
+			$post_author = get_userdata( $post->post_author );
+			$default_to = $post_author->user_email;
 		}
 
 		$this->defaults = array(
@@ -617,15 +612,15 @@ class Grunion_Contact_Form extends Crunion_Contact_Form_Shortcode {
 			self::$last = $form;
 		}
 
-		// Output the grunion.css stylesheet if self::$style allows it
+		// Enqueue the grunion.css stylesheet if self::$style allows it
 		if ( self::$style && ( empty( $_REQUEST['action'] ) || $_REQUEST['action'] != 'grunion_shortcode_to_json' ) ) {
-			ob_start();
-			wp_print_styles( 'grunion.css' ); // wp_print_styles() will only ever print grunion.css once, regaurdless of how many times it is called.
-			$r = ob_get_clean();
-		} else {
-			$r = '';
+			// Enqueue the style here instead of printing it, because if some other plugin has run the_post()+rewind_posts(),
+			// (like VideoPress does), the style tag gets "printed" the first time and discarded, leaving the contact form unstyled.
+			// when WordPress does the real loop.
+			wp_enqueue_style( 'grunion.css' );
 		}
 
+		$r = '';
 		$r .= "<div id='contact-form-$id'>\n";
 	
 		if ( is_wp_error( $form->errors ) && $form->errors->get_error_codes() ) {
