@@ -5,7 +5,7 @@
  * Plugin URI: http://wordpress.org/extend/plugins/jetpack/
  * Description: Bring the power of the WordPress.com cloud to your self-hosted WordPress. Jetpack enables you to connect your blog to a WordPress.com account to use the powerful features normally only available to WordPress.com users.
  * Author: Automattic
- * Version: 2.1.2
+ * Version: 2.2
  * Author URI: http://jetpack.me
  * License: GPL2+
  * Text Domain: jetpack
@@ -17,7 +17,7 @@ define( 'JETPACK__API_VERSION', 1 );
 define( 'JETPACK__MINIMUM_WP_VERSION', '3.3' );
 defined( 'JETPACK_CLIENT__AUTH_LOCATION' ) or define( 'JETPACK_CLIENT__AUTH_LOCATION', 'header' );
 defined( 'JETPACK_CLIENT__HTTPS' ) or define( 'JETPACK_CLIENT__HTTPS', 'AUTO' );
-define( 'JETPACK__VERSION', '2.1.2' );
+define( 'JETPACK__VERSION', '2.2' );
 define( 'JETPACK__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'JETPACK__GLOTPRESS_LOCALES_PATH' ) or define( 'JETPACK__GLOTPRESS_LOCALES_PATH', JETPACK__PLUGIN_DIR . 'locales.php' );
 
@@ -452,6 +452,7 @@ class Jetpack {
 				'active_modules',
 				'do_activate',
 				'publicize',
+				'widget_twitter',
 			);
 		}
 
@@ -757,6 +758,7 @@ class Jetpack {
 			case 'infinite-scroll' :
 			case 'photon' :
 			case 'tiled-gallery' :
+			case 'likes' :
 				break;
 
 			// These modules are default off if we think the site is a private one
@@ -1629,7 +1631,7 @@ p {
 				<div class="jetpack-text-container">
 					<h4>
 						<?php if ( 1 == Jetpack::get_option( 'activated' ) ) : ?>
-							<p><?php _e( '<strong>Your Jetpack is almost ready</strong> &#8211; A connection to WordPress.com is needed to enable features like Comments, Stats, Contact Forms, and Subscriptions. Connect now to get fueled up!', 'jetpack' ); ?></p>
+							<p><?php _e( '<strong>Your Jetpack is almost ready</strong> &#8211; A connection to WordPress.com is needed to enable features like Stats, Contact Forms, and Subscriptions. Connect now to get fueled up!', 'jetpack' ); ?></p>
 						<?php else : ?>
 							<p><?php _e( '<strong>Jetpack is installed</strong> and ready to bring awesome, WordPress.com cloud-powered features to your site.', 'jetpack' ) ?></p>
 						<?php endif; ?>
@@ -3202,7 +3204,7 @@ p {
 	function verify_json_api_authorization_request() {
 		require_once dirname( __FILE__ ) . '/class.jetpack-signature.php';
 
-		$token = Jetpack_Data::get_access_token( 1 );
+		$token = Jetpack_Data::get_access_token( JETPACK_MASTER_USER );
 		if ( !$token || empty( $token->secret ) ) {
 			wp_die( __( 'You must connect your Jetpack plugin to WordPress.com to use this feature.' , 'jetpack') );
 		}
@@ -4479,3 +4481,5 @@ register_deactivation_hook( __FILE__, array( 'Jetpack', 'plugin_deactivation' ) 
 add_action( 'init', array( 'Jetpack', 'init' ) );
 add_action( 'plugins_loaded', array( 'Jetpack', 'load_modules' ), 100 );
 add_filter( 'jetpack_static_url', array( 'Jetpack', 'staticize_subdomain' ) );
+
+Jetpack_Sync::sync_options( __FILE__, 'widget_twitter' );
