@@ -819,7 +819,13 @@ EOPHP;
 			return false;
 		}
 
-		$post_status_obj = get_post_status_object( $post->post_status );
+		if ( 'inherit' == $post->post_status ) {
+			$parent_post = get_post( $post->post_parent );
+			$post_status_obj = get_post_status_object( $parent_post->post_status );
+		} else {
+			$post_status_obj = get_post_status_object( $post->post_status );
+		}
+
 		if ( !$post_status_obj->public ) {
 			if ( is_user_logged_in() ) {
 				if ( $post_status_obj->protected ) {
@@ -1149,10 +1155,13 @@ abstract class WPCOM_JSON_API_Post_Endpoint extends WPCOM_JSON_API_Endpoint {
 
 			$posts = get_posts( array( 'name' => $post_id ) );
 			if ( !$posts || !isset( $posts[0]->ID ) || !$posts[0]->ID ) {
-				return new WP_Error( 'unknown_post', 'Unknown post', 404 );
+				$page = get_page_by_path( $post_id );
+				if ( !$page )
+					return new WP_Error( 'unknown_post', 'Unknown post', 404 );
+				$post_id = $page->ID;
+			} else {
+				$post_id = (int) $posts[0]->ID;
 			}
-
-			$post_id = (int) $posts[0]->ID;
 			break;
 		default :
 			$post_id = (int) $post_id;
@@ -1278,7 +1287,7 @@ abstract class WPCOM_JSON_API_Post_Endpoint extends WPCOM_JSON_API_Endpoint {
 				$response[$key] = (int) $post->comment_count;
 				break;
 			case 'like_count' :
-				$response[$key] = (int) $this->api->post_like_count( array( 'post_id' => $post->ID, 'blog_id' => $blog_id ) );
+				$response[$key] = (int) $this->api->post_like_count( $blog_id, $post->ID );
 				break;
 			case 'featured_image' :
 				$image_attributes = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), 'full' );
@@ -1582,9 +1591,10 @@ class WPCOM_JSON_API_List_Posts_Endpoint extends WPCOM_JSON_API_Post_Endpoint {
 			is_array( $sticky )
 		) {
 			if ( $args['sticky'] ) {
-				$query['posts__in'] = $sticky;
+				$query['post__in'] = $sticky;
 			} else {
-				$query['posts__not_in'] = $sticky;
+				$query['post__not_in'] = $sticky;
+				$query['ignore_sticky_posts'] = 1;
 			}
 		}
 
@@ -1842,11 +1852,13 @@ class WPCOM_JSON_API_Update_Post_Endpoint extends WPCOM_JSON_API_Post_Endpoint {
 			$post_id = wp_insert_post( add_magic_quotes( $insert ), true );
 
 			if ( $has_media ) {
+				$this->api->trap_wp_die( 'upload_error' );
 				foreach ( $input['media'] as $media_item ) {
 					$_FILES['.api.media.item.'] = $media_item;
 					// check for WP_Error if we ever actually need $media_id
 					$media_id = media_handle_upload( '.api.media.item.', $post_id );
 				}
+				$this->api->trap_wp_die( null );
 
 				unset( $_FILES['.api.media.item.'] );
 			}
@@ -2629,7 +2641,7 @@ class WPCOM_JSON_API_Update_Comment_Endpoint extends WPCOM_JSON_API_Comment_Endp
 
 		$insert = array(
 			'comment_post_ID'      => $post->ID,
-			'user_id'              => $user->ID,
+			'user_ID'              => $user->ID,
 			'comment_author'       => $user->display_name,
 			'comment_author_email' => $user->user_email,
 			'comment_author_url'   => $user->user_url,
@@ -2638,14 +2650,9 @@ class WPCOM_JSON_API_Update_Comment_Endpoint extends WPCOM_JSON_API_Comment_Endp
 			'comment_type'         => '',
 		);
 
-		ob_start();
-		add_filter( 'wp_die_handler', array( $this, 'filter_wp_die_callback' ), 10, 1 ); //override wp_die
+		$this->api->trap_wp_die( 'comment_failure' );
 		$comment_id = wp_new_comment( add_magic_quotes( $insert ) );
-		remove_filter( 'wp_die_handler', array( $this, 'filter_wp_die_callback' ), 10, 1 );
-		$msg = ob_get_clean();
-		if ( $msg ) {
-			return new WP_Error( 400, $msg );
-		}
+		$this->api->trap_wp_die( null );
 
 		$return = $this->get_comment( $comment_id, $args['context'] );
 		if ( !$return ) {
@@ -2763,16 +2770,6 @@ class WPCOM_JSON_API_Update_Comment_Endpoint extends WPCOM_JSON_API_Comment_Endp
 
 		return $this->get_comment( $comment->comment_ID, $args['context'] );
 	}
-
-	function filter_wp_die_callback( $callback ) {
-		return array( $this, 'trap_wp_die' );
-	}
-
-	//die with the message, ob_start/ob_get_clean will pick up the actual error message
-	function trap_wp_die( $msg, $title = '', $args = array() ) {
-		die( $msg );
-	}
-
 }
 
 class WPCOM_JSON_API_GET_Site_Endpoint extends WPCOM_JSON_API_Endpoint {
