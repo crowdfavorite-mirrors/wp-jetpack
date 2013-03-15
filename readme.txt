@@ -1,9 +1,9 @@
 === Jetpack by WordPress.com ===
-Contributors: automattic, apeatling, beaulebens, hugobaeta, Joen, mdawaffe, andy, designsimply, hew, westi, eoigal, tmoorewp, matt, pento, cfinke, daniloercoli, chellycat, gibrown, jblz, jshreve, barry, alternatekev, azaozz, ethitter, johnjamesjacoby, lancewillett, martinremy, nickmomrik, stephdau, yoavf, matveb
+Contributors: automattic, apeatling, beaulebens, hugobaeta, Joen, mdawaffe, andy, designsimply, hew, westi, eoigal, tmoorewp, matt, pento, cfinke, daniloercoli, chellycat, gibrown, jblz, jshreve, barry, alternatekev, azaozz, ethitter, johnjamesjacoby, lancewillett, martinremy, nickmomrik, stephdau, yoavf, matveb, jeherve
 Tags: WordPress.com, statistics, stats, views, tweets, twitter, widget, gravatar, hovercards, profile, equations, latex, math, maths, youtube, shortcode, archives, audio, blip, bliptv, dailymotion, digg, flickr, googlevideo, google, googlemaps, kyte, kytetv, livevideo, redlasso, rockyou, rss, scribd, slide, slideshare, soundcloud, vimeo, shortlinks, wp.me, subscriptions, notifications, notes, json, api, rest, mosaic, gallery, slideshow
 Requires at least: 3.3
 Tested up to: 3.5
-Stable tag: 2.1.2
+Stable tag: 2.2
 
 Supercharge your WordPress site with powerful features previously only available to WordPress.com users.
 
@@ -18,6 +18,7 @@ Features include:
 * Simple, concise stats with no additional load on your server.  Previously provided by [WordPress.com Stats](http://wordpress.org/extend/plugins/stats/).
 * Email subscriptions for your blog's posts and your post's comments.
 * Social networking enabled comment system.
+* Likes, allowing your readers to show their appreciation of your posts.
 * Monitor and manage your site's activity with Notifications in your Toolbar and on WordPress.com.
 * Simple, Akismet-backed contact forms.
 * The [WP.me URL shortener](http://wp.me/sf2B5-shorten).
@@ -89,6 +90,38 @@ Use [shortcodes](http://support.wordpress.com/shortcodes/) to embed your media. 
 8. Mobile Theme
 
 == Changelog ==
+
+= 2.2 =
+* Enhancement: Likes: Allow your readers to show their appreciation of your posts.
+* Enhancement: Shortcodes: SoundCloud: Update to version 2.3 of the SoundCloud plugin (HTML5 default player, various fixes).
+* Enhancement: Shortcodes: Subscriptions: Add a shortcode to enable placement of a subscription signup form in a post or page.
+* Enhancement: Sharedaddy: Allow selecting multiple images from a post using the Pinterest share button.
+* Enhancement: Contact Form: Allow feedbacks to be marked spam in bulk.
+* Enhancement: Widgets: Readmill Widget: Give your visitors a link to send your book to their Readmill library.
+* Note: Notifications: Discontinue support for Internet Explorer 7 and below.
+* Bug Fix: JSON API: Fix authorization problems that some users were experiencing.
+* Bug Fix: JSON API: Sticky posts were not being sorted correctly in /posts requests.
+* Bug Fix: Stats: sync stats_options so server has roles array needed for view_stats cap check.
+* Bug Fix: Infinite Scroll: Display improvements.
+* Bug Fix: Infinite Scroll: WordPress compatibility fixes.
+* Bug Fix: Photon: Only rewrite iamge urls if the URL is compatible with Photon.
+* Bug Fix: Photon: Account for registered image sizes with one or more dimesions set to zero.
+* Bug Fix: Subscriptions: Make HTML markup more valid.
+* Bug Fix: Subscriptions: Fixed notices displayed in debug mode.
+* Bug Fix: Custom CSS: CSS warnings and errors should now work in environments where JavaScript is concatenated or otherwise modified before being served.
+* Bug Fix: Hovercards: WordPress compatibility fixes.
+* Bug Fix: Improved image handling for the Sharing and Publicize modules.
+* Bug Fix: Carousel: Display and Scrollbar fixes.
+* Bug Fix: Tiled Galleries: Restrict images in tiled galleries from being set larger than their containers.
+* Bug Fix: Widgets: Gravatar Profile: CSS fixes.
+* Bug Fix: Publicize: Strip HTML comments from the data we send to the third party services.
+* Bug Fix: Notifications: Dropped support for IE7 and below in the notifications menu.
+* Bug Fix: Custom CSS Editor: Allow custom themes to save CSS more easily.
+* Bug Fix: Infinite Scroll: Waits until the DOM is ready before loading the scrolling code.
+* Bug Fix: Mobile Theme: If the user has disabled the custom header text color, show the default black header text color.
+* Bug Fix: Mobile Theme: Fix for the "View Full Site" link.
+* Bug Fix: Mobile Theme: Use a filter to modify the output of wp_title().
+* Bug Fix: Publicize: Twitter: Re-enable character count turning red when more than 140 characters are typed.
 
 = 2.1.2 =
 * Enhancement: Infinite Scroll: Introduce filters for Infinite Scroll.
