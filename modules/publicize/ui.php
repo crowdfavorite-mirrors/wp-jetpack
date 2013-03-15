@@ -237,7 +237,7 @@ class Publicize_UI {
 <script type="text/javascript">
 jQuery( function($) {
 	var wpasTitleCounter    = $( '#wpas-title-counter' ),
-	    wpasTwitterCheckbox = $( '#wpas-submit-twitter' ).size(),
+	    wpasTwitterCheckbox = $( '.wpas-submit-twitter' ).size(),
 	    wpasTitle = $('#wpas-title').keyup( function() {
 		var length = wpasTitle.val().length;
 		wpasTitleCounter.text( length );
@@ -267,7 +267,7 @@ jQuery( function($) {
 
 				var defaultMessage = $.trim( '<?php printf( $default_prefix, 'url' ); printf( $default_message, '$("#title").val()', 'url' ); printf( $default_suffix, 'url' ); ?>' );
 
-				wpasTitle.append( defaultMessage );
+				wpasTitle.append( defaultMessage.replace( /<[^>]+>/g,'') );
 
 				var selBeg = defaultMessage.indexOf( $("#title").val() );
 				if ( selBeg < 0 ) {
@@ -436,7 +436,7 @@ jQuery( function($) {
 							// those connections, don't let them change it
 							$cmeta = $this->publicize->get_connection_meta( $connection );
 							$hidden_checkbox = false;
-							if ( !$done && ( 0 == $cmeta['user_id'] && !current_user_can( Publicize::GLOBAL_CAP ) ) ) {
+							if ( !$done && ( 0 == $cmeta['connection_data']['user_id'] && !current_user_can( Publicize::GLOBAL_CAP ) ) ) {
 								$disabled = ' disabled="disabled"';
 								$hidden_checkbox = true;
 							}
@@ -460,7 +460,7 @@ jQuery( function($) {
 							?>
 							<li>
 								<label for="wpas-submit-<?php echo esc_attr( $unique_id ); ?>">
-									<input type="checkbox" name="wpas[submit][<?php echo $unique_id; ?>]" id="wpas-submit-<?php echo $unique_id; ?>" value="1" <?php
+									<input type="checkbox" name="wpas[submit][<?php echo $unique_id; ?>]" id="wpas-submit-<?php echo $unique_id; ?>" class="wpas-submit-<?php echo $name; ?>" value="1" <?php
 										checked( true, $checked );
 										echo $disabled;
 									?> />

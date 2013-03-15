@@ -405,12 +405,15 @@ function sharing_add_footer() {
 	if ( apply_filters( 'sharing_js', true ) ) {
 
 		if ( is_array( $jetpack_sharing_counts ) && count( $jetpack_sharing_counts ) ) :
+			$sharing_post_urls = array_filter( $jetpack_sharing_counts );
+			if ( $sharing_post_urls ) :
 ?>
 
 	<script type="text/javascript">
-		WPCOM_sharing_counts = <?php echo json_encode( array_flip( $jetpack_sharing_counts ) ); ?>
+		WPCOM_sharing_counts = <?php echo json_encode( array_flip( $sharing_post_urls ) ); ?>
 	</script>
 <?php
+			endif;
 		endif;
 
 		wp_print_scripts( 'sharing-js' );
@@ -458,8 +461,20 @@ function sharing_display( $text = '' ) {
 		return $text;
 	}
 
+	// Don't output flair on excerpts
 	if ( in_array( 'get_the_excerpt', (array) $wp_current_filter ) ) {
 		return $text;
+	}
+
+	// Don't allow flair to be added to the_content more than once (prevent infinite loops)
+	$done = false;
+	foreach ( $wp_current_filter as $filter ) {
+		if ( 'the_content' == $filter ) {
+			if ( $done )
+				return $text;
+			else
+				$done = true;
+		}
 	}
 
 	// check whether we are viewing the front page and whether the front page option is checked
