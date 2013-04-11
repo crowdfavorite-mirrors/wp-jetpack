@@ -4,6 +4,7 @@
  * Module Description: Monitor and manage your site's activity with Notifications in your Toolbar and on WordPress.com.
  * Sort Order: 1
  * First Introduced: 1.9
+ * Requires Connection: Yes
  */
 
 if ( !defined( 'JETPACK_NOTES__CACHE_BUSTER' ) ) define( 'JETPACK_NOTES__CACHE_BUSTER', JETPACK__VERSION . '-' . gmdate( 'oW' ) );
@@ -42,24 +43,6 @@ class Jetpack_Notifications {
 		$this->jetpack = Jetpack::init();
 
 		add_action( 'init', array( &$this, 'action_init' ) );
-
-		//post types that support comments
-		$filt_post_types = array();
-		foreach ( get_post_types() as $post_type ) {
-			if ( post_type_supports( $post_type, 'comments' ) ) {
-				$filt_post_types[] = $post_type;
-			}
-		}
-
-		Jetpack_Sync::sync_posts( __FILE__, array(
-			'post_types' => $filt_post_types,
-			'post_stati' => array( 'publish' ),
-		) );
-		Jetpack_Sync::sync_comments( __FILE__, array(
-			'post_types' => $filt_post_types,
-			'post_stati' => array( 'publish' ),
-			'comment_stati' => array( 'approve', 'approved', '1', 'hold', 'unapproved', 'unapprove', '0', 'spam', 'trash' ),
-		) );
 	}
 
 	function wpcom_static_url($file) {
@@ -104,6 +87,26 @@ class Jetpack_Notifications {
 	}
 
 	function action_init() {
+		//syncing must wait until after init so
+		//post types that support comments
+		$filt_post_types = array();
+		$all_post_types = get_post_types();
+		foreach ( $all_post_types as $post_type ) {
+			if ( post_type_supports( $post_type, 'comments' ) ) {
+				$filt_post_types[] = $post_type;
+			}
+		}
+
+		Jetpack_Sync::sync_posts( __FILE__, array(
+			'post_types' => $filt_post_types,
+			'post_stati' => array( 'publish' ),
+		) );
+		Jetpack_Sync::sync_comments( __FILE__, array(
+			'post_types' => $filt_post_types,
+			'post_stati' => array( 'publish' ),
+			'comment_stati' => array( 'approve', 'approved', '1', 'hold', 'unapproved', 'unapprove', '0', 'spam', 'trash' ),
+		) );
+
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX )
 			return;
 		
@@ -166,7 +169,7 @@ class Jetpack_Notifications {
 		$wp_admin_bar->add_menu( array(
 			'id'     => 'notes',
 			'title'  => '<span id="wpnt-notes-unread-count" class="' . esc_attr( $classes ) . '">
-					<span class="noticon noticon-notification" /></span>
+					<span class="noticon noticon-notification"></span>
 					</span>',
 			'meta'   => array(
 				'html'  => '<div id="wpnt-notes-panel" style="display:none"><div class="wpnt-notes-panel-header"><span class="wpnt-notes-header">' . __('Notifications', 'jetpack') . '</span><span class="wpnt-notes-panel-link"></span></div></div>',
