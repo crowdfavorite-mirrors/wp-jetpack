@@ -54,6 +54,7 @@ class Sharing_Service {
 			'google-plus-1' => 'Share_GooglePlus1',
 			'tumblr'        => 'Share_Tumblr',
 			'pinterest'     => 'Share_Pinterest',
+			'pocket'        => 'Share_Pocket',
 		);
 
 		// Add any custom services in
@@ -452,7 +453,7 @@ function sharing_process_requests() {
 		}
 	}
 }
-add_action( 'template_redirect', 'sharing_process_requests' );
+add_action( 'template_redirect', 'sharing_process_requests', 9 );
 
 function sharing_display( $text = '' ) {
 	global $post, $wp_current_filter;
