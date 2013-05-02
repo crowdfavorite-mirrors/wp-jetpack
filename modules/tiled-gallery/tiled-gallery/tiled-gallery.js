@@ -9,13 +9,13 @@ var TiledGallery = function() {
 
 	$( window ).on( 'resize', function () {
 		clearTimeout( self.resizeTimeout );
-		
+
 		self.resizeTimeout = setTimeout( function () { self.resize(); }, 150 );
 	} );
 
     // Make any new galleries loaded by Infinite Scroll flexible
     $( 'body' ).on( 'post-load', $.proxy( self.initialize, self ) );
-	
+
 	// Populate and set up captions on newdash galleries.
 	$( document ).on( 'page-rendered.wpcom-newdash', $.proxy( self.populate, self ) );
 
@@ -51,7 +51,7 @@ TiledGallery.prototype.Captions = function() {
 	/* Hide captions */
 	this.caption.hide();
 
-	this.item.on( 'hover', function() {
+	this.item.on( 'mouseenter mouseleave', function() {
 		$( this ).find( '.tiled-gallery-caption' ).slideToggle( 'fast' );
 	});
 };
@@ -61,7 +61,7 @@ TiledGallery.prototype.resize = function() {
 
 	this.gallery.each( function ( galleryIndex, galleryElement ) {
 		var thisGallery = $( galleryElement );
-		
+
 		// All images must be loaded before proceeding.
 		var imagesLoaded = true;
 

@@ -55,7 +55,7 @@ abstract class WPCOM_JSON_API_Endpoint {
 
 	// Is this endpoint still in testing phase?  If so, not available to the public.
 	var $in_testing = false;
-	
+
 	/**
 	 * @var string Version of the API
 	 */
@@ -163,6 +163,7 @@ abstract class WPCOM_JSON_API_Endpoint {
 		$input = trim( $this->api->post_body );
 
 		switch ( $this->api->content_type ) {
+		case 'application/json; charset=utf-8' :
 		case 'application/json' :
 		case 'application/x-javascript' :
 		case 'text/javascript' :
@@ -446,6 +447,16 @@ abstract class WPCOM_JSON_API_Endpoint {
 			);
 			$return[$key] = (object) $this->cast_and_filter( $value, apply_filters( 'wpcom_json_api_attachment_cast_and_filter', $docs ), false, $for_output );
 			break;
+		case 'metadata' :
+			$docs = array(
+				'id'       => '(int)',
+				'key'       => '(string)',
+				'value'     => '(string|false|float|int|array|object)',
+				'previous_value' => '(string)',
+				'operation'  => '(string)',
+			);
+			$return[$key] = (object) $this->cast_and_filter( $value, apply_filters( 'wpcom_json_api_attachment_cast_and_filter', $docs ), false, $for_output );
+			break;
 		default :
 			trigger_error( "Unknown API casting type {$type['type']}", E_USER_WARNING );
 		}
@@ -560,7 +571,7 @@ abstract class WPCOM_JSON_API_Endpoint {
 
 <?php
 		// If no example was hardcoded in the doc, try to get some
-		if ( empty( $this->example_response ) ) { 
+		if ( empty( $this->example_response ) ) {
 
 			// Examples for endpoint documentation response
 			$response_key = 'dev_response_' . $this->version . '_' . $this->method . '_' . sanitize_title( $this->path );
@@ -1009,11 +1020,11 @@ EOPHP;
 
 		$gmt_offset = get_option( 'gmt_offset' );
 		$local_time = $time + $gmt_offset * 3600;
-		
+
 		$date = getdate( ( int ) $local_time );
 		$datetime->setDate( $date['year'], $date['mon'], $date['mday'] );
 		$datetime->setTime( $date['hours'], $date['minutes'], $date['seconds'] );
-        
+
 		$local      = $datetime->format( 'Y-m-d H:i:s' );
 		return array( (string) $local, (string) $gmt );
 	}
@@ -1091,14 +1102,14 @@ abstract class WPCOM_JSON_API_Post_Endpoint extends WPCOM_JSON_API_Endpoint {
 		),
 		'password' => '(string) The plaintext password protecting the post, or, more likely, the empty string if the post is not password protected.',
 		'parent'   => "(object>post_reference|false) A reference to the post's parent, if it has one.",
-		'type'     => array(
-			'post' => 'A blog post.',
-			'page' => 'A page.',
-		),
+		'type'     => "(string) The post's post_type. Post types besides post and page need to be whitelisted using the <code>rest_api_allowed_post_types</code> filter.",
 		'comments_open'  => '(bool) Is the post open for comments?',
 		'pings_open'     => '(bool) Is the post open for pingbacks, trackbacks?',
 		'comment_count'  => '(int) The number of comments for this post.',
 		'like_count'     => '(int) The number of likes for this post.',
+		'i_like'         => '(bool) Does the current user like this post?',
+		'is_reblogged'   => '(bool) Did the current user reblog this post?',
+		'is_following'   => '(bool) Is the current user following this blog?',
 		'featured_image' => '(URL) The URL to the featured image for this post if it has one.',
 		'format'         => array(), // see constructor
 		'geo'            => '(object>geo|false)',
@@ -1106,7 +1117,8 @@ abstract class WPCOM_JSON_API_Post_Endpoint extends WPCOM_JSON_API_Endpoint {
 		'tags'           => '(object:tag) Hash of tags (keyed by tag name) applied to the post.',
 		'categories'     => '(object:category) Hash of categories (keyed by category name) applied to the post.',
 		'attachments'	 => '(object:attachment) Hash of post attachments (keyed by attachment ID).',
-		'meta'           => '(object) Meta data',
+		'metadata'	     => '(array) Array of post metadata keys and values. All unprotected meta keys are available by default for read requests. Both unprotected and protected meta keys are avaiable for authenticated requests with access. Protected meta keys can be made available with the <code>rest_api_allowed_public_metadata</code> filter.',
+		'meta'           => '(object) API result meta data',
 	);
 
 	// var $response_format =& $this->post_object_format;
@@ -1120,6 +1132,30 @@ abstract class WPCOM_JSON_API_Post_Endpoint extends WPCOM_JSON_API_Endpoint {
 		}
 		parent::__construct( $args );
 	}
+
+	function is_post_type_allowed( $post_type ) {
+
+		// if the post type is empty, that's fine, WordPress will default to post
+		if ( empty( $post_type ) )
+			return true;
+
+		// whitelist of post types that can be accessed
+ 		if ( in_array( $post_type, apply_filters( 'rest_api_allowed_post_types', array( 'post', 'page', 'any' ) ) ) )
+			return true;
+
+ 		return false;
+ 	}
+
+	function is_metadata_public( $key ) {
+		if ( empty( $key ) )
+			return false;
+
+		// whitelist of post types that can be accessed
+ 		if ( in_array( $key, apply_filters( 'rest_api_allowed_public_metadata', array() ) ) )
+			return true;
+
+ 		return false;
+ 	}
 
 	function the_password_form() {
 		return __( 'This post is password protected.', 'jetpack' );
@@ -1173,8 +1209,7 @@ abstract class WPCOM_JSON_API_Post_Endpoint extends WPCOM_JSON_API_Endpoint {
 			return new WP_Error( 'unknown_post', 'Unknown post', 404 );
 		}
 
-		$types = array( 'post', 'page' );
-		if ( !in_array( $post->post_type, $types ) ) {
+		if ( ! $this->is_post_type_allowed( $post->post_type ) ) {
 			return new WP_Error( 'unknown_post', 'Unknown post', 404 );
 		}
 
@@ -1289,6 +1324,15 @@ abstract class WPCOM_JSON_API_Post_Endpoint extends WPCOM_JSON_API_Endpoint {
 			case 'like_count' :
 				$response[$key] = (int) $this->api->post_like_count( $blog_id, $post->ID );
 				break;
+			case 'i_like'     :
+				$response[$key] = (int) $this->api->is_liked( $blog_id, $post->ID );
+				break;
+			case 'is_reblogged':
+				$response[$key] = (int) $this->api->is_reblogged( $blog_id, $post->ID );
+				break;
+			case 'is_following':
+				$response[$key] = (int) $this->api->is_following( $blog_id );
+				break;
 			case 'featured_image' :
 				$image_attributes = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), 'full' );
 				if ( is_array( $image_attributes ) && isset( $image_attributes[0] ) )
@@ -1378,6 +1422,32 @@ abstract class WPCOM_JSON_API_Post_Endpoint extends WPCOM_JSON_API_Endpoint {
 					$response[$key][$attachment->ID] = $this->get_attachment( $attachment );
 				}
 				$response[$key] = (object) $response[$key];
+				break;
+			case 'metadata' : // (array|false)
+				$metadata = array();
+				foreach ( (array) has_meta( $post_id ) as $meta ) {
+					// Don't expose protected fields.
+					$show = false;
+					if ( $this->is_metadata_public( $meta['meta_key'] ) )
+						$show = true;
+					if ( current_user_can( 'edit_post_meta', $post_id , $meta['meta_key'] ) )
+						$show = true;
+
+					if ( !$show )
+						continue;
+
+					$metadata[] = array(
+						'id'    => $meta['meta_id'],
+						'key'   => $meta['meta_key'],
+						'value' => $meta['meta_value']
+					);
+				}
+
+				if ( ! empty( $metadata ) ) {
+					$response[$key] = $metadata;
+				} else {
+					$response[$key] = false;
+				}
 				break;
 			case 'meta' :
 				$response[$key] = (object) array(
@@ -1573,15 +1643,36 @@ class WPCOM_JSON_API_List_Posts_Endpoint extends WPCOM_JSON_API_Post_Endpoint {
 			return new WP_Error( 'invalid_number',  'The NUMBER parameter must be less than or equal to 100.', 400 );
 		}
 
+		if ( ! $this->is_post_type_allowed( $args['type'] ) ) {
+			return new WP_Error( 'unknown_post_type', 'Unknown post type', 404 );
+		}
+
 		$query = array(
 			'posts_per_page' => $args['number'],
 			'order'          => $args['order'],
 			'orderby'        => $args['order_by'],
-			'post_type'      => $args['type'],
+			'post_type'      => ( 'any' == $args['type'] ) ? array( 'post', 'page' ) : $args['type'],
 			'post_status'    => $args['status'],
 			'author'         => isset( $args['author'] ) && 0 < $args['author'] ? $args['author'] : null,
 			's'              => isset( $args['search'] ) ? $args['search'] : null,
 		);
+
+		if ( isset( $args['meta_key'] ) ) {
+			$show = false;
+			if ( $this->is_metadata_public( $args['meta_key'] ) )
+				$show = true;
+			if ( current_user_can( 'edit_post_meta', $query['post_type'], $args['meta_key'] ) )
+				$show = true;
+
+			if ( is_protected_meta( $args['meta_key'], 'post' ) && ! $show )
+				return new WP_Error( 'invalid_meta_key', 'Invalid meta key', 404 );
+
+			$meta = array( 'key' => $args['meta_key'] );
+			if ( isset( $args['meta_value'] ) )
+				$meta['value'] = $args['meta_value'];
+
+			$query['meta_query'] = array( $meta );
+		}
 
 		if (
 			isset( $args['sticky'] )
@@ -1735,7 +1826,15 @@ class WPCOM_JSON_API_Update_Post_Endpoint extends WPCOM_JSON_API_Post_Endpoint {
 				return new WP_Error( 'invalid_input', 'Invalid request input', 400 );
 			}
 
+			// default to post
+			if ( empty( $input['type'] ) )
+				$input['type'] = 'post';
+
 			$post_type = get_post_type_object( $input['type'] );
+
+			if ( ! $this->is_post_type_allowed( $input['type'] ) ) {
+				return new WP_Error( 'unknown_post_type', 'Unknown post type', 404 );
+			}
 
 			if ( 'publish' === $input['status'] ) {
 				if ( !current_user_can( $post_type->cap->publish_posts ) ) {
@@ -1782,12 +1881,21 @@ class WPCOM_JSON_API_Update_Post_Endpoint extends WPCOM_JSON_API_Post_Endpoint {
 
 		if ( !empty( $input['categories'] )) {
 			if ( is_array( $input['categories'] ) ) {
-				$categories = $input['categories'];
+				$_categories = $input['categories'];
 			} else {
 				foreach ( explode( ',', $input['categories'] ) as $category ) {
-					$categories[] = $category;
+					$_categories[] = $category;
 				}
  			}
+			foreach ( $_categories as $category ) {
+				if ( !$category_info = term_exists( $category, 'category' ) ) {
+					if ( is_int( $category ) )
+						continue;
+					$category_info = wp_insert_term( $category, 'category' );
+				}
+				if ( !is_wp_error( $category_info ) )
+					$categories[] = (int) $category_info['term_id'];
+			}
 		}
 
 		if ( !empty( $input['tags'] ) ) {
@@ -1802,9 +1910,9 @@ class WPCOM_JSON_API_Update_Post_Endpoint extends WPCOM_JSON_API_Post_Endpoint {
  		}
 
 		unset( $input['tags'], $input['categories'] );
-		
+
 		$insert = array();
-		
+
 		if ( !empty( $input['slug'] ) ) {
 			$insert['post_name'] = $input['slug'];
 			unset( $input['slug'] );
@@ -1814,22 +1922,30 @@ class WPCOM_JSON_API_Update_Post_Endpoint extends WPCOM_JSON_API_Post_Endpoint {
 			$insert['comment_status'] = 'open';
 		else if ( false === $input['comments_open'] )
 			$insert['comment_status'] = 'closed';
-			
+
 		if ( true === $input['pings_open'] )
 			$insert['ping_status'] = 'open';
 		else if ( false === $input['pings_open'] )
 			$insert['ping_status'] = 'closed';
-			
+
 		unset( $input['comments_open'], $input['pings_open'] );
-		
+
 		$publicize = $input['publicize'];
 		$publicize_custom_message = $input['publicize_message'];
 		unset( $input['publicize'], $input['publicize_message'] );
-		
+
+		$metadata = $input['metadata'];
+		unset( $input['metadata'] );
+
 		foreach ( $input as $key => $value ) {
 			$insert["post_$key"] = $value;
 		}
-		
+
+		if ( !empty( $tags ) )
+			$insert["tax_input"]["post_tag"] = $tags;
+		if ( !empty( $categories ) )
+			$insert["tax_input"]["category"] = $categories;
+
 		$has_media = isset( $input['media'] ) && $input['media'] ? count( $input['media'] ) : false;
 
 		if ( $new ) {
@@ -1870,7 +1986,7 @@ class WPCOM_JSON_API_Update_Post_Endpoint extends WPCOM_JSON_API_Post_Endpoint {
 		if ( !$post_id || is_wp_error( $post_id ) ) {
 			return $post_id;
 		}
-			
+
 		if ( $publicize === false ) {
 			foreach ( $GLOBALS['publicize_ui']->publicize->get_services( 'all' ) as $name => $service ) {
 				update_post_meta( $post_id, $GLOBALS['publicize_ui']->publicize->POST_SKIP . $name, 1 );
@@ -1882,16 +1998,75 @@ class WPCOM_JSON_API_Update_Post_Endpoint extends WPCOM_JSON_API_Post_Endpoint {
 				}
 			}
 		}
-		
+
 		if ( !empty( $publicize_custom_message ) )
-			update_post_meta( $post_id, $GLOBALS['publicize_ui']->publicize->POST_MESS, trim( $publicize_custom_message ) ); 
-		
-		if ( is_array( $categories ) )
-			wp_set_object_terms( $post_id, $categories, 'category' );
-		if ( is_array( $tags ) )
-			wp_set_object_terms( $post_id, $tags, 'post_tag' );
+			update_post_meta( $post_id, $GLOBALS['publicize_ui']->publicize->POST_MESS, trim( $publicize_custom_message ) );
 
 		set_post_format( $post_id, $insert['post_format'] );
+
+		if ( ! empty( $metadata ) ) {
+			foreach ( (array) $metadata as $meta ) {
+
+				$existing_meta_item = new stdClass;
+
+				if ( empty( $meta->operation ) )
+					$meta->operation = 'update';
+
+				if ( ! empty( $meta->value ) ) {
+					if ( 'true' == $meta->value )
+						$meta->value = true;
+					if ( 'false' == $meta->value )
+						$meta->value = false;
+				}
+
+				if ( ! empty( $meta->id ) ) {
+					$meta->id = absint( $meta->id );
+					$existing_meta_item = get_metadata_by_mid( 'post', $meta->id );
+				}
+
+				$unslashed_meta_key = wp_unslash( $meta->key ); // should match what the final key will be
+				$meta->key = wp_slash( $meta->key );
+				$unslashed_existing_meta_key = wp_unslash( $existing_meta_item->meta_key );
+				$existing_meta_item->meta_key = wp_slash( $existing_meta_item->meta_key );
+
+				switch ( $meta->operation ) {
+					case 'delete':
+
+						if ( ! empty( $meta->id ) && ! empty( $existing_meta_item->meta_key ) && current_user_can( 'delete_post_meta', $post_id, $unslashed_existing_meta_key ) ) {
+							delete_metadata_by_mid( 'post', $meta->id );
+						} elseif ( ! empty( $meta->key ) && ! empty( $meta->previous_value ) && current_user_can( 'delete_post_meta', $post_id, $unslashed_meta_key ) ) {
+							delete_post_meta( $post_id, $meta->key, $meta->previous_value );
+						} elseif ( ! empty( $meta->key ) && current_user_can( 'delete_post_meta', $post_id, $unslashed_meta_key ) ) {
+							delete_post_meta( $post_id, $meta->key );
+						}
+
+						break;
+					case 'add':
+
+						if ( ! empty( $meta->id ) || ! empty( $meta->previous_value ) ) {
+							continue;
+						} elseif ( ! empty( $meta->key ) && ! empty( $meta->value ) && current_user_can( 'add_post_meta', $post_id, $unslashed_meta_key ) ) {
+							add_post_meta( $post_id, $meta->key, $meta->value );
+						}
+
+						break;
+					case 'update':
+
+						if ( empty( $meta->value ) ) {
+							continue;
+						} elseif ( ! empty( $meta->id ) && ! empty( $existing_meta_item->meta_key ) && current_user_can( 'edit_post_meta', $post_id, $unslashed_existing_meta_key ) ) {
+							update_metadata_by_mid( 'post', $meta->id, $meta->value );
+						} elseif ( ! empty( $meta->key ) && ! empty( $meta->previous_value ) && current_user_can( 'edit_post_meta', $post_id, $unslashed_meta_key ) ) {
+							update_post_meta( $post_id, $meta->key,$meta->value, $meta->previous_value );
+						} elseif ( ! empty( $meta->key ) && current_user_can( 'edit_post_meta', $post_id, $unslashed_meta_key ) ) {
+							update_post_meta( $post_id, $meta->key, $meta->value );
+						}
+
+						break;
+				}
+
+			}
+		}
 
 		$return = $this->get_post_by( 'ID', $post_id, $args['context'] );
 		if ( !$return || is_wp_error( $return ) ) {
@@ -1908,6 +2083,10 @@ class WPCOM_JSON_API_Update_Post_Endpoint extends WPCOM_JSON_API_Post_Endpoint {
 		$post = get_post( $post_id );
 		if ( !$post || is_wp_error( $post ) ) {
 			return new WP_Error( 'unknown_post', 'Unknown post', 404 );
+		}
+
+		if ( ! $this->is_post_type_allowed( $post->post_type ) ) {
+			return new WP_Error( 'unknown_post_type', 'Unknown post type', 404 );
 		}
 
 		if ( !current_user_can( 'delete_post', $post->ID ) ) {
@@ -2048,7 +2227,7 @@ class WPCOM_JSON_API_Update_Taxonomy_Endpoint extends WPCOM_JSON_API_Taxonomy_En
 		  		'parent'      => $input['parent']
 			)
 		);
-	
+
 		$taxonomy = get_term_by( 'id', $data['term_id'], $taxonomy_type );
 		$return   = $this->get_taxonomy( $taxonomy->slug, $taxonomy_type, $args['context'] );
 		if ( !$return || is_wp_error( $return ) ) {
@@ -2093,7 +2272,7 @@ class WPCOM_JSON_API_Update_Taxonomy_Endpoint extends WPCOM_JSON_API_Taxonomy_En
 
 		$data     = wp_update_term( $taxonomy->term_id, $taxonomy_type, $update );
 		$taxonomy = get_term_by( 'id', $data['term_id'], $taxonomy_type );
-		
+
 		$return   = $this->get_taxonomy( $taxonomy->slug, $taxonomy_type, $args['context'] );
 		if ( !$return || is_wp_error( $return ) ) {
 			return $return;
@@ -2695,8 +2874,15 @@ class WPCOM_JSON_API_Update_Comment_Endpoint extends WPCOM_JSON_API_Comment_Endp
 
 		if ( isset( $update['comment_status'] ) ) {
 			switch ( $update['comment_status'] ) {
+				case 'approved' :
+					if ( 'approve' !== $comment_status ) {
+						wp_set_comment_status( $comment->comment_ID, 'approve' );
+					}
+					break;
 				case 'unapproved' :
-					$update['comment_approved'] = 0;
+					if ( 'hold' !== $comment_status ) {
+						wp_set_comment_status( $comment->comment_ID, 'hold' );
+					}
 					break;
 				case 'spam' :
 					if ( 'spam' !== $comment_status ) {
@@ -2713,7 +2899,7 @@ class WPCOM_JSON_API_Update_Comment_Endpoint extends WPCOM_JSON_API_Comment_Endp
 						return new WP_Error( 'trash_disabled', 'Cannot trash comment', 403 );
 					}
 
-					if ( 'trash' !== $comment_status ) { 
+					if ( 'trash' !== $comment_status ) {
  						wp_trash_comment( $comment_id );
  					}
  					break;
@@ -2729,9 +2915,10 @@ class WPCOM_JSON_API_Update_Comment_Endpoint extends WPCOM_JSON_API_Comment_Endp
 			unset( $update['comment_status'] );
 		}
 
-		$update['comment_ID'] = $comment->comment_ID;
-
-		wp_update_comment( add_magic_quotes( $update ) );
+		if ( ! empty( $update ) ) {
+			$update['comment_ID'] = $comment->comment_ID;
+			wp_update_comment( add_magic_quotes( $update ) );
+		}
 
 		$return = $this->get_comment( $comment->comment_ID, $args['context'] );
 		if ( !$return || is_wp_error( $return ) ) {
@@ -2907,11 +3094,7 @@ new WPCOM_JSON_API_List_Posts_Endpoint( array(
 		'before'   => '(ISO 8601 datetime) Return posts dated on or before the specified datetime.',
 		'tag'      => '(string) Specify the tag name or slug.',
 		'category' => '(string) Specify the category name or slug.',
-		'type'     => array(
-			'post' => 'Return only blog posts.',
-			'page' => 'Return only pages.',
-			'any'  => 'Return both blog posts and pages.',
-		),
+		'type'     => "(string) Specify the post type. Defaults to 'post', use 'any' to query for both posts and pages. Post types besides post and page need to be whitelisted using the <code>rest_api_allowed_post_types</code> filter.",
 		'status'   => array(
 			'publish' => 'Return only published posts.',
 			'private' => 'Return only private posts.',
@@ -2924,6 +3107,8 @@ new WPCOM_JSON_API_List_Posts_Endpoint( array(
 		'sticky'   => '(bool) Specify the stickiness.',
 		'author'   => "(int) Author's user ID",
 		'search'   => '(string) Search query',
+		'meta_key'   => '(string) Metadata key that the post should contain',
+		'meta_value'   => '(int|string) Metadata value that the post should contain. Will only be applied if a `meta_key` is also given',
 	),
 
 	'example_request' => 'https://public-api.wordpress.com/rest/v1/sites/en.blog.wordpress.com/posts/?number=5&pretty=1'
@@ -3002,15 +3187,13 @@ new WPCOM_JSON_API_Update_Post_Endpoint( array(
 		),
 		'password'  => '(string) The plaintext password protecting the post, or, more likely, the empty string if the post is not password protected.',
 		'parent'    => "(int) The post ID of the new post's parent.",
-		'type'      => array(
-			'post' => 'Create a blog post.',
-			'page' => 'Create a page.',
-		),
+		'type'      => "(string) The post type. Defaults to 'post'. Post types besides post and page need to be whitelisted using the <code>rest_api_allowed_post_types</code> filter.",
 		'categories' => "(array|string) Comma separated list or array of categories (name or id)",
 		'tags'       => "(array|string) Comma separated list or array of tags (name or id)",
 		'format'     => get_post_format_strings(),
 		'media'      => "(media) An array of images to attach to the post. To upload media, the entire request should be multipart/form-data encoded.  Multiple media items will be displayed in a gallery.  Accepts images (image/gif, image/jpeg, image/png) only.<br /><br /><strong>Example</strong>:<br />" .
 				"<code>curl \<br />--form 'title=Image' \<br />--form 'media[]=@/path/to/file.jpg' \<br />-H 'Authorization: BEARER your-token' \<br />'https://public-api.wordpress.com/rest/v1/sites/123/posts/new'</code>",
+		'metadata'      => "(array) Array of metadata objects containing the following properties: `key` (metadata key), `id` (meta ID), `previous_value` (if set, the action will only occur for the provided previous value), `value` (the new value to set the meta to), `operation` (the operation to perform: `update` or `add`; defaults to `update`). All unprotected meta keys are available by default for read requests. Both unprotected and protected meta keys are avaiable for authenticated requests with access. Protected meta keys can be made available with the <code>rest_api_allowed_public_metadata</code> filter.",
 		'comments_open' => "(bool) Should the post be open to comments?  Defaults to the blog's preference.",
 		'pings_open'    => "(bool) Should the post be open to comments?  Defaults to the blog's preference.",
 	),
@@ -3026,7 +3209,7 @@ new WPCOM_JSON_API_Update_Post_Endpoint( array(
 			'title'      => 'Hello World',
 			'content'    => 'Hello. I am a test post. I was created by the API',
 			'tags'       => 'tests',
-			'categories' => 'API'			
+			'categories' => 'API'
 		)
 	),
 
@@ -3056,11 +3239,14 @@ new WPCOM_JSON_API_Update_Post_Endpoint( array(
 	"pings_open": true,
 	"comment_count": 0,
 	"like_count": 0,
+	"i_like": false,
+	"is_reblogged": false,
+	"is_following": false,
 	"featured_image": "",
 	"format": "standard",
 	"geo": false,
 	"publicize_URLs": [
-		
+
 	],
 	"tags": {
 		"tests": {
@@ -3091,6 +3277,13 @@ new WPCOM_JSON_API_Update_Post_Endpoint( array(
 					"site": "https:\/\/public-api.wordpress.com\/rest\/v1\/sites\/30434183"
 				}
 			}
+		}
+	},
+	"metadata {
+		{
+			"id" : 123,
+			"key" : "test_meta_key",
+			"value" : "test_value",
 		}
 	},
 	"meta": {
@@ -3138,6 +3331,7 @@ new WPCOM_JSON_API_Update_Post_Endpoint( array(
 		'format'     => get_post_format_strings(),
 		'comments_open' => '(bool) Should the post be open to comments?',
 		'pings_open'    => '(bool) Should the post be open to comments?',
+		'metadata'      => "(array) Array of metadata objects containing the following properties: `key` (metadata key), `id` (meta ID), `previous_value` (if set, the action will only occur for the provided previous value), `value` (the new value to set the meta to), `operation` (the operation to perform: `update` or `add`; defaults to `update`). All unprotected meta keys are available by default for read requests. Both unprotected and protected meta keys are avaiable for authenticated requests with access. Protected meta keys can be made available with the <code>rest_api_allowed_public_metadata</code> filter.",
 	),
 
 	'example_request'      => 'https://public-api.wordpress.com/rest/v1/sites/30434183/posts/1222/',
@@ -3151,7 +3345,7 @@ new WPCOM_JSON_API_Update_Post_Endpoint( array(
 			'title'      => 'Hello World (Again)',
 			'content'    => 'Hello. I am an edited post. I was edited by the API',
 			'tags'       => 'tests',
-			'categories' => 'API'			
+			'categories' => 'API'
 		)
 	),
 
@@ -3181,11 +3375,14 @@ new WPCOM_JSON_API_Update_Post_Endpoint( array(
 	"pings_open": true,
 	"comment_count": 5,
 	"like_count": 0,
+	"i_like": false,
+	"is_reblogged": false,
+	"is_following": false,
 	"featured_image": "",
 	"format": "standard",
 	"geo": false,
 	"publicize_URLs": [
-		
+
 	],
 	"tags": {
 		"tests": {
@@ -3218,6 +3415,13 @@ new WPCOM_JSON_API_Update_Post_Endpoint( array(
 			}
 		}
 	},
+	"metadata {
+		{
+			"id" : 123,
+			"key" : "test_meta_key",
+			"value" : "test_value",
+		}
+	},
 	"meta": {
 		"links": {
 			"self": "https:\/\/public-api.wordpress.com\/rest\/v1\/sites\/30434183\/posts\/1222",
@@ -3232,7 +3436,7 @@ new WPCOM_JSON_API_Update_Post_Endpoint( array(
 ) );
 
 new WPCOM_JSON_API_Update_Post_Endpoint( array(
-	'description' => 'Delete a Post',
+	'description' => 'Delete a Post. Note: If the post object is of type post or page and the trash is enabled, this request will send the post to the trash. A second request will permanently delete the post.',
 	'group'       => 'posts',
 	'stat'        => 'posts:1:delete',
 
@@ -3277,11 +3481,14 @@ new WPCOM_JSON_API_Update_Post_Endpoint( array(
 	"pings_open": true,
 	"comment_count": 5,
 	"like_count": 0,
+	"i_like": false,
+	"is_reblogged": false,
+	"is_following": false,
 	"featured_image": "",
 	"format": "standard",
 	"geo": false,
 	"publicize_URLs": [
-		
+
 	],
 	"tags": {
 		"tests": {
@@ -3296,6 +3503,13 @@ new WPCOM_JSON_API_Update_Post_Endpoint( array(
 					"site": "https:\/\/public-api.wordpress.com\/rest\/v1\/sites\/30434183"
 				}
 			}
+		}
+	},
+	"metadata {
+		{
+			"id" : 123,
+			"key" : "test_meta_key",
+			"value" : "test_value",
 		}
 	},
 	"categories": {

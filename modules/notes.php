@@ -109,7 +109,7 @@ class Jetpack_Notifications {
 
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX )
 			return;
-		
+
 		if ( !has_filter( 'show_admin_bar', '__return_true' ) && !is_user_logged_in() )
 			return;
 
@@ -122,41 +122,24 @@ class Jetpack_Notifications {
 	}
 
 	function styles_and_scripts() {
-		wp_enqueue_style( 'notes-admin-bar-rest', $this->wpcom_static_url( '/wp-content/mu-plugins/notes/admin-bar-rest.css' ), array(), JETPACK_NOTES__CACHE_BUSTER );
+		wp_enqueue_style( 'wpcom-notes-admin-bar', $this->wpcom_static_url( '/wp-content/mu-plugins/notes/admin-bar-v2.css' ), array(), JETPACK_NOTES__CACHE_BUSTER );
 		wp_enqueue_style( 'noticons', $this->wpcom_static_url( '/i/noticons/noticons.css' ), array(), JETPACK_NOTES__CACHE_BUSTER );
 
 		$this->print_js();
 
 		// attempt to use core or plugin libraries if registered
-		if ( wp_script_is( 'mustache', 'registered' ) ) {
-			if ( !wp_script_is( 'mustache', 'queue' ) ) {
-				wp_enqueue_script( 'mustache' );
-			}
+		if ( !wp_script_is( 'mustache', 'registered' ) ) {
+			wp_register_script( 'mustache', $this->wpcom_static_url( '/wp-content/js/mustache.js' ), null, JETPACK_NOTES__CACHE_BUSTER );
 		}
-		else {
-			wp_enqueue_script( 'mustache', $this->wpcom_static_url( '/wp-content/js/mustache.js' ), null, JETPACK_NOTES__CACHE_BUSTER );
+		if ( !wp_script_is( 'underscore', 'registered' ) ) {
+			wp_register_script( 'underscore', $this->wpcom_static_url( '/wp-includes/js/underscore.min.js' ), null, JETPACK_NOTES__CACHE_BUSTER );
 		}
-
-		if ( wp_script_is( 'underscore', 'registered' ) ) {
-			if ( !wp_script_is( 'underscore', 'queue' ) ) {
-				wp_enqueue_script( 'underscore' );
-			}
-		}
-		else {
-			wp_enqueue_script( 'underscore', $this->wpcom_static_url( '/wp-content/js/underscore.js' ), null, JETPACK_NOTES__CACHE_BUSTER );
-		}
-		if ( wp_script_is( 'backbone', 'registered' ) ) {
-			if ( !wp_script_is( 'backbone', 'queue' ) ) {
-				wp_enqueue_script( 'backbone' );
-			}
-		}
-		else {
-			wp_enqueue_script( 'backbone', $this->wpcom_static_url( '/wp-content/js/backbone.js' ), array( 'jquery', 'underscore' ), JETPACK_NOTES__CACHE_BUSTER );
+		if ( !wp_script_is( 'backbone', 'registered' ) ) {
+			wp_register_script( 'backbone', $this->wpcom_static_url( '/wp-includes/js/backbone.min.js' ), array( 'underscore' ), JETPACK_NOTES__CACHE_BUSTER );
 		}
 
-		wp_enqueue_script( 'notes-postmessage', $this->wpcom_static_url( '/wp-content/js/postmessage.js' ), array(), JETPACK_NOTES__CACHE_BUSTER );
-		wp_enqueue_script( 'notes-rest-common', $this->wpcom_static_url( '/wp-content/mu-plugins/notes/notes-rest-common.js' ), array( 'backbone', 'mustache', 'jquery.spin' ), JETPACK_NOTES__CACHE_BUSTER );
-		wp_enqueue_script( 'notes-admin-bar-rest', $this->wpcom_static_url( '/wp-content/mu-plugins/notes/admin-bar-rest.js' ), array( 'jquery', 'underscore', 'backbone', 'jquery.spin' ), JETPACK_NOTES__CACHE_BUSTER );
+		wp_register_script( 'wpcom-notes-common', $this->wpcom_static_url( '/wp-content/mu-plugins/notes/notes-common-v2.js' ), array( 'jquery', 'underscore', 'backbone', 'mustache', 'jquery.spin' ), JETPACK_NOTES__CACHE_BUSTER );
+		wp_enqueue_script( 'wpcom-notes-admin-bar', $this->wpcom_static_url( '/wp-content/mu-plugins/notes/admin-bar-v2.js' ), array( 'wpcom-notes-common' ), JETPACK_NOTES__CACHE_BUSTER );
 	}
 
 	function admin_bar_menu() {
@@ -172,7 +155,7 @@ class Jetpack_Notifications {
 					<span class="noticon noticon-notification"></span>
 					</span>',
 			'meta'   => array(
-				'html'  => '<div id="wpnt-notes-panel" style="display:none"><div class="wpnt-notes-panel-header"><span class="wpnt-notes-header">' . __('Notifications', 'jetpack') . '</span><span class="wpnt-notes-panel-link"></span></div></div>',
+				'html'  => '<div id="wpnt-notes-panel" style="display:none" lang="'. esc_attr( get_locale() ) . '" dir="' . ( is_rtl() ? 'rtl' : 'ltr' ) . '"><div class="wpnt-notes-panel-header"><span class="wpnt-notes-header">' . __( 'Notifications', 'jetpack' ) . '</span><span class="wpnt-notes-panel-link"></span></div></div>',
 				'class' => 'menupop',
 			),
 			'parent' => 'top-secondary',

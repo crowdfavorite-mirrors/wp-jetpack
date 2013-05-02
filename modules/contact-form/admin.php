@@ -6,6 +6,10 @@ function menu_alter() {
 	#menu-posts-feedback .wp-menu-image img { display: none; }
 	#adminmenu .menu-icon-feedback:hover div.wp-menu-image, #adminmenu .menu-icon-feedback.wp-has-current-submenu div.wp-menu-image, #adminmenu .menu-icon-feedback.current div.wp-menu-image { background: url("' .GRUNION_PLUGIN_URL . 'images/grunion-menu-hover.png") no-repeat 7px 7px !important; }
 	#adminmenu .menu-icon-feedback div.wp-menu-image, #adminmenu .menu-icon-feedback div.wp-menu-image, #adminmenu .menu-icon-feedback div.wp-menu-image { background: url("' . GRUNION_PLUGIN_URL . 'images/grunion-menu.png") no-repeat 7px 7px !important; }
+	body.admin-color-mp6 #adminmenu .menu-icon-feedback div.wp-menu-image, body.admin-color-mp6 #adminmenu .menu-icon-feedback div.wp-menu-image, body.admin-color-mp6 #adminmenu .menu-icon-feedback div.wp-menu-image { background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIHg9IjBweCIgeT0iMHB4IiB3aWR0aD0iMjBweCIgaGVpZ2h0PSIyMHB4IiB2aWV3Qm94PSItNDc5LjUgMzAwLjUgMjAgMjAiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgLTQ3OS41IDMwMC41IDIwIDIwIiB4bWw6c3BhY2U9InByZXNlcnZlIj48c3R5bGU+LnN0eWxlMHtmaWxsOgkjOTk5OTk5O308L3N0eWxlPjxwYXRoIGQ9Ik0tNDcxLjUgMzA3LjVoNnYzaC02VjMwNy41eiBNLTQ3MS41IDMxMS41aDZ2M2gtNlYzMTEuNXogTS00NzQuNSAzMDcuNWgydjFoLTJWMzA3LjV6IE0tNDc0LjUgMzExLjVoMnYxaC0yIFYzMTEuNXogTS00NjMuNSAzMDEuNWgtMTNjLTAuNDg5IDAtMSAwLjUxMi0xIDF2MTRjMCAwLjUgMC41IDEgMSAxaDEzYzAuNDg5IDAgMS0wLjUxMiAxLTF2LTE0IEMtNDYyLjUgMzAyLjAxMi00NjMuMDExIDMwMS41LTQ2My41IDMwMS41eiBNLTQ2NC41IDMxNS41aC0xMXYtOWgxMVYzMTUuNXoiIGNsYXNzPSJzdHlsZTAiLz48L3N2Zz4=) no-repeat 7px 7px !important; background-size: 20px 20px !important;}
+	body.admin-color-mp6 #adminmenu .menu-icon-feedback:hover div.wp-menu-image { background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIHg9IjBweCIgeT0iMHB4IiB3aWR0aD0iMjBweCIgaGVpZ2h0PSIyMHB4IiB2aWV3Qm94PSItNDc5LjUgMzAwLjUgMjAgMjAiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgLTQ3OS41IDMwMC41IDIwIDIwIiB4bWw6c3BhY2U9InByZXNlcnZlIj48c3R5bGU+LnN0eWxlMHtmaWxsOgkjMkVBMkNDO308L3N0eWxlPjxwYXRoIGQ9Ik0tNDcxLjUgMzA3LjVoNnYzaC02VjMwNy41eiBNLTQ3MS41IDMxMS41aDZ2M2gtNlYzMTEuNXogTS00NzQuNSAzMDcuNWgydjFoLTJWMzA3LjV6IE0tNDc0LjUgMzExLjVoMnYxaC0yIFYzMTEuNXogTS00NjMuNSAzMDEuNWgtMTNjLTAuNDg5IDAtMSAwLjUxMi0xIDF2MTRjMCAwLjUgMC41IDEgMSAxaDEzYzAuNDg5IDAgMS0wLjUxMiAxLTF2LTE0IEMtNDYyLjUgMzAyLjAxMi00NjMuMDExIDMwMS41LTQ2My41IDMwMS41eiBNLTQ2NC41IDMxNS41aC0xMXYtOWgxMVYzMTUuNXoiIGNsYXNzPSJzdHlsZTAiLz48L3N2Zz4=) no-repeat 7px 7px !important; }
+	body.admin-color-mp6 #adminmenu .menu-icon-feedback.wp-has-current-submenu div.wp-menu-image, body.admin-color-mp6 #adminmenu .menu-icon-feedback.current div.wp-menu-image { background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIHg9IjBweCIgeT0iMHB4IiB3aWR0aD0iMjBweCIgaGVpZ2h0PSIyMHB4IiB2aWV3Qm94PSItNDc5LjUgMzAwLjUgMjAgMjAiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgLTQ3OS41IDMwMC41IDIwIDIwIiB4bWw6c3BhY2U9InByZXNlcnZlIj48c3R5bGU+LnN0eWxlMHtmaWxsOgkjRkZGRkZGO308L3N0eWxlPjxwYXRoIGQ9Ik0tNDcxLjUgMzA3LjVoNnYzaC02VjMwNy41eiBNLTQ3MS41IDMxMS41aDZ2M2gtNlYzMTEuNXogTS00NzQuNSAzMDcuNWgydjFoLTJWMzA3LjV6IE0tNDc0LjUgMzExLjVoMnYxaC0yIFYzMTEuNXogTS00NjMuNSAzMDEuNWgtMTNjLTAuNDg5IDAtMSAwLjUxMi0xIDF2MTRjMCAwLjUgMC41IDEgMSAxaDEzYzAuNDg5IDAgMS0wLjUxMiAxLTF2LTE0IEMtNDYyLjUgMzAyLjAxMi00NjMuMDExIDMwMS41LTQ2My41IDMwMS41eiBNLTQ2NC41IDMxNS41aC0xMXYtOWgxMVYzMTUuNXoiIGNsYXNzPSJzdHlsZTAiLz48L3N2Zz4=) no-repeat 7px 7px !important; }
+
 	.grunion-menu-button { background: url("' . GRUNION_PLUGIN_URL . 'images/grunion-form.png") no-repeat; width: 13px; height: 13px; display: inline-block; vertical-align: middle; ) }
 	@media only screen and (-moz-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5) {
 	    #adminmenu .menu-icon-feedback:hover div.wp-menu-image, #adminmenu .menu-icon-feedback.wp-has-current-submenu div.wp-menu-image, #adminmenu .menu-icon-feedback.current div.wp-menu-image { background: url("' .GRUNION_PLUGIN_URL . 'images/grunion-menu-hover-2x.png") no-repeat 7px 7px !important; background-size: 15px 16px !important; }
@@ -49,7 +53,7 @@ function grunion_admin_css() {
 ?>
 
 <style type='text/css'>
-.add-new-h2, .view-switch, body.no-js .tablenav select[name^=action], body.no-js #doaction, body.no-js #doaction2 { 
+.add-new-h2, .view-switch, body.no-js .tablenav select[name^=action], body.no-js #doaction, body.no-js #doaction2 {
 	display: none
 }
 
@@ -191,7 +195,7 @@ function grunion_admin_view_tabs( $views ) {
 	preg_match( '|post_type=feedback\'( class="current")?\>(.*)\<span class=|', $views['all'], $match );
 	if ( !empty( $match[2] ) )
 		$views['all'] = str_replace( $match[2], 'Messages ', $views['all'] );
-	
+
 	return $views;
 }
 
@@ -336,7 +340,7 @@ jQuery(document).ready( function($) {
 			function( r ) {
 				$('#post-<?php echo $post_id; ?>')
 					.css( {backgroundColor:'#FF7979'} )
-					.fadeOut(350, function() { 
+					.fadeOut(350, function() {
 						$(this).remove();
 						$('.subsubsub').html(r);
 				});
@@ -394,7 +398,7 @@ jQuery(document).ready( function($) {
 			function( r ) {
 				$('#post-<?php echo $post_id; ?>')
 					.css( {backgroundColor:'#59C859'} )
-					.fadeOut(350, function() { 
+					.fadeOut(350, function() {
 						$(this).remove();
 						$('.subsubsub').html(r);
 				});
@@ -473,7 +477,7 @@ function grunion_ajax_shortcode() {
 // and constructs a json object representing its contents and attributes
 function grunion_ajax_shortcode_to_json() {
 	global $post, $grunion_form;
-	
+
 	check_ajax_referer( 'grunion_shortcode_to_json' );
 
 	if ( !isset( $_POST['content'] ) || !is_numeric( $_POST['post_id'] ) ) {
@@ -583,7 +587,7 @@ function grunion_ajax_spam() {
 	$sql = "
 		SELECT post_status,
 			COUNT( * ) AS post_count
-		FROM `{$wpdb->posts}` 
+		FROM `{$wpdb->posts}`
 		WHERE post_type =  'feedback'
 		GROUP BY post_status
 	";
