@@ -776,3 +776,49 @@ function jetpack_likes_more_link() {
 }
 add_action( 'jetpack_learn_more_button_likes', 'jetpack_likes_more_link' );
 // Likes: STOP
+
+// Debug: START
+function jetpack_debug_more_info() { ?>
+
+	<h4><?php esc_html_e( 'Debug' , 'jetpack' ); ?></h4>
+
+	<p><?php esc_html_e( "A debugging platform for the Jetpack plugin. Find out why Jetpack isn't working for you and submit a help request direct from your Dashboard.", 'jetpack' ); ?></p>
+	<?php if ( Jetpack::is_module_active( 'debug' ) ) : ?>
+		<p><a href="<?php echo admin_url( 'admin.php?page=jetpack-debugger' ); ?>"><?php esc_html_e( "Click here to start debugging.", 'jetpack' ); ?></a></p>
+
+	<?php endif; ?>
+<?php
+}
+
+function jetpack_debug_more_link() {
+	echo '<a class="button-secondary more-info-link" href="http://jetpack.me/support/debug/">' . __( 'Learn More', 'jetpack' ) . '</a>';
+}
+
+add_action( 'jetpack_module_more_info_debug', 'jetpack_debug_more_info' );
+add_action( 'jetpack_module_more_info_connected_debug', 'jetpack_debug_more_info' );
+add_action( 'jetpack_learn_more_button_debug', 'jetpack_debug_more_link' );
+// Debug: STOP
+
+// Omnisearch: START
+function jetpack_omnisearch_more_info() { ?>
+
+	<h4><?php esc_html_e( 'Omnisearch' , 'jetpack' ); ?></h4>
+
+	<p><?php esc_html_e( 'Search once, get results from everything! Currently supports searching posts, pages, comments, and plugins.', 'jetpack' ); ?></p>
+
+	<p><?php esc_html_e( 'Omnisearch plays nice with other plugins by letting other providers offer results as well.', 'jetpack' ); ?></p>
+
+	<?php if( class_exists( 'Jetpack_Omnisearch' ) ): ?>
+		<?php echo Jetpack_Omnisearch::get_omnisearch_form(); ?>
+	<?php endif; ?>
+
+<?php
+}
+
+function jetpack_omnisearch_more_link() {
+	echo '<a class="button-secondary more-info-link" href="http://jetpack.me/support/omnisearch/">' . __( 'Learn More', 'jetpack' ) . '</a>';
+}
+
+add_action( 'jetpack_module_more_info_omnisearch',  'jetpack_omnisearch_more_info' );
+add_action( 'jetpack_learn_more_button_omnisearch', 'jetpack_omnisearch_more_link' );
+// Omnisearch: STOP

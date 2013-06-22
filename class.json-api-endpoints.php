@@ -887,6 +887,9 @@ EOPHP;
 			$profile_URL = 'http://en.gravatar.com/' . md5( strtolower( trim( $email ) ) );
 		} else {
 			if ( isset( $author->post_author ) ) {
+				if ( 0 == $author->post_author )
+					return null;
+
 				$author = $author->post_author;
 			} elseif ( isset( $author->user_id ) && $author->user_id ) {
 				$author = $author->user_id;
@@ -1150,7 +1153,7 @@ abstract class WPCOM_JSON_API_Post_Endpoint extends WPCOM_JSON_API_Endpoint {
 		if ( empty( $key ) )
 			return false;
 
-		// whitelist of post types that can be accessed
+		// whitelist of metadata that can be accessed
  		if ( in_array( $key, apply_filters( 'rest_api_allowed_public_metadata', array() ) ) )
 			return true;
 
@@ -1439,7 +1442,7 @@ abstract class WPCOM_JSON_API_Post_Endpoint extends WPCOM_JSON_API_Endpoint {
 					$metadata[] = array(
 						'id'    => $meta['meta_id'],
 						'key'   => $meta['meta_key'],
-						'value' => $meta['meta_value']
+						'value' => maybe_unserialize( $meta['meta_value'] ),
 					);
 				}
 
@@ -2007,6 +2010,8 @@ class WPCOM_JSON_API_Update_Post_Endpoint extends WPCOM_JSON_API_Post_Endpoint {
 		if ( ! empty( $metadata ) ) {
 			foreach ( (array) $metadata as $meta ) {
 
+				$meta = (object) $meta;
+
 				$existing_meta_item = new stdClass;
 
 				if ( empty( $meta->operation ) )
@@ -2067,6 +2072,8 @@ class WPCOM_JSON_API_Update_Post_Endpoint extends WPCOM_JSON_API_Post_Endpoint {
 
 			}
 		}
+
+		do_action( 'rest_api_inserted_post', $post_id, $insert, $new );
 
 		$return = $this->get_post_by( 'ID', $post_id, $args['context'] );
 		if ( !$return || is_wp_error( $return ) ) {
@@ -3108,7 +3115,7 @@ new WPCOM_JSON_API_List_Posts_Endpoint( array(
 		'author'   => "(int) Author's user ID",
 		'search'   => '(string) Search query',
 		'meta_key'   => '(string) Metadata key that the post should contain',
-		'meta_value'   => '(int|string) Metadata value that the post should contain. Will only be applied if a `meta_key` is also given',
+		'meta_value'   => '(string) Metadata value that the post should contain. Will only be applied if a `meta_key` is also given',
 	),
 
 	'example_request' => 'https://public-api.wordpress.com/rest/v1/sites/en.blog.wordpress.com/posts/?number=5&pretty=1'
