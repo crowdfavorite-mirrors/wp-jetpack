@@ -5,7 +5,7 @@
  * Plugin URI: http://wordpress.org/extend/plugins/jetpack/
  * Description: Bring the power of the WordPress.com cloud to your self-hosted WordPress. Jetpack enables you to connect your blog to a WordPress.com account to use the powerful features normally only available to WordPress.com users.
  * Author: Automattic
- * Version: 2.3
+ * Version: 2.3.1
  * Author URI: http://jetpack.me
  * License: GPL2+
  * Text Domain: jetpack
@@ -17,11 +17,20 @@ define( 'JETPACK__API_VERSION', 1 );
 define( 'JETPACK__MINIMUM_WP_VERSION', '3.3' );
 defined( 'JETPACK_CLIENT__AUTH_LOCATION' ) or define( 'JETPACK_CLIENT__AUTH_LOCATION', 'header' );
 defined( 'JETPACK_CLIENT__HTTPS' ) or define( 'JETPACK_CLIENT__HTTPS', 'AUTO' );
-define( 'JETPACK__VERSION', '2.3' );
+define( 'JETPACK__VERSION', '2.3.1' );
 define( 'JETPACK__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'JETPACK__GLOTPRESS_LOCALES_PATH' ) or define( 'JETPACK__GLOTPRESS_LOCALES_PATH', JETPACK__PLUGIN_DIR . 'locales.php' );
 
 define( 'JETPACK_MASTER_USER', true );
+
+// Constants for expressing human-readable intervals
+// in their respective number of seconds.
+// Introduced in WordPress 3.5, specified here for backward compatability.
+defined( 'MINUTE_IN_SECONDS' ) or define( 'MINUTE_IN_SECONDS', 60 );
+defined( 'HOUR_IN_SECONDS' )   or define( 'HOUR_IN_SECONDS',   60 * MINUTE_IN_SECONDS );
+defined( 'DAY_IN_SECONDS' )    or define( 'DAY_IN_SECONDS',    24 * HOUR_IN_SECONDS   );
+defined( 'WEEK_IN_SECONDS' )   or define( 'WEEK_IN_SECONDS',    7 * DAY_IN_SECONDS    );
+defined( 'YEAR_IN_SECONDS' )   or define( 'YEAR_IN_SECONDS',  365 * DAY_IN_SECONDS    );
 
 /*
 Options:
@@ -1792,6 +1801,11 @@ p {
 				wp_redirect( $this->build_connect_url( true ) );
 				exit;
 			case 'activate' :
+				if ( ! current_user_can( 'activate_plugins' ) ) {
+					$error = 'cheatin';
+					break;
+				}
+
 				$module = stripslashes( $_GET['module'] );
 				check_admin_referer( "jetpack_activate-$module" );
 				Jetpack::activate_module( $module );
@@ -1812,6 +1826,10 @@ p {
 				wp_safe_redirect( Jetpack::admin_url() );
 				exit;
 			case 'deactivate' :
+				if ( ! current_user_can( 'activate_plugins' ) ) {
+					$error = 'cheatin';
+					break;
+				}
 				$modules = stripslashes( $_GET['module'] );
 				check_admin_referer( "jetpack_deactivate-$modules" );
 				foreach ( explode( ',', $modules ) as $module ) {
@@ -1835,6 +1853,9 @@ p {
 		}
 
 		switch ( $error ) {
+		case 'cheatin' :
+			$this->error = __( 'Cheatin&#8217; uh?', 'jetpack' );
+			break;
 		case 'access_denied' :
 			$this->error = __( 'You need to authorize the Jetpack connection between your site and WordPress.com to enable the awesome features.', 'jetpack' );
 			break;
@@ -2628,13 +2649,17 @@ p {
 				<?php endif; ?>
 				</div>
 			</div>
-			<?php if ( 'inactive' == $css && $jetpack_connected ) : ?>
+			<?php if ( 'inactive' == $css && $jetpack_connected && current_user_can( 'manage_options' ) && apply_filters( 'jetpack_can_activate_' . $module, true ) ) : ?>
 			<script type="text/javascript">
 			jQuery( '#<?php echo esc_js( $module ); ?>' ).bind( 'click', function(e){
 				if ( !jQuery(e.target).hasClass('more-info-link') )
 					document.location.href = '<?php echo str_replace( '&amp;', '&', esc_js( esc_url( $toggle_url ) ) ); ?>';
 			} );
 			</script>
+			<?php else: ?>
+			<style>
+				#<?php echo esc_js( $module ); ?> { cursor: default; }
+			</style>
 			<?php endif; ?>
 
 			<div id="jp-more-info-<?php echo esc_attr( $module ); ?>" style="display:none;">
@@ -2727,7 +2752,12 @@ p {
 		$jetpack = Jetpack::init();
 
 		// Yay! Your host is good!
-		if ( wp_http_supports( array( 'ssl' => true ) ) ) {
+		if ( false === ( $jetpack_https_test = get_transient( 'jetpack_https_test' ) ) ) {
+			$jetpack_https_test = ( is_wp_error( wp_remote_get( JETPACK__API_BASE . '.test/1/' ) ) ? 0 : 1 );
+			set_transient( 'jetpack_https_test', $jetpack_https_test, HOUR_IN_SECONDS );
+	 	}
+		
+		if ( $jetpack_https_test && wp_http_supports( array( 'ssl' => true ) ) ) {
 			return $url;
 		}
 
