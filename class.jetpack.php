@@ -83,7 +83,7 @@ class Jetpack {
 	/**
 	 * Holds the singleton instance of this class
 	 * @since 2.3.3
-	 * @var Jetpack 
+	 * @var Jetpack
 	 */
 	static $instance = false;
 
@@ -483,28 +483,35 @@ class Jetpack {
 		}
 
 		$conflicting_plugins = array(
-			'facebook/facebook.php',                                                			// Official Facebook plugin
-			'wordpress-seo/wp-seo.php',                                             			// WordPress SEO by Yoast
-			'add-link-to-facebook/add-link-to-facebook.php',                        			// Add Link to Facebook
-			'facebook-awd/AWD_facebook.php',                                        			// Facebook AWD All in one
-			'header-footer/plugin.php',                                             			// Header and Footer
-			'nextgen-facebook/nextgen-facebook.php',                                			// NextGEN Facebook OG
-			'seo-facebook-comments/seofacebook.php',                                			// SEO Facebook Comments
-			'seo-ultimate/seo-ultimate.php',                                        			// SEO Ultimate
-			'sexybookmarks/sexy-bookmarks.php',                                     			// Shareaholic
-			'shareaholic/sexy-bookmarks.php',                                       			// Shareaholic
-			'social-discussions/social-discussions.php',                            			// Social Discussions
-			'social-networks-auto-poster-facebook-twitter-g/NextScripts_SNAP.php',				// NextScripts SNAP
-			'wordbooker/wordbooker.php',                                            			// Wordbooker
-			'socialize/socialize.php',                                              			// Socialize
-			'simple-facebook-connect/sfc.php',                                      			// Simple Facebook Connect
-			'social-sharing-toolkit/social_sharing_toolkit.php',                    			// Social Sharing Toolkit
-			'wp-facebook-open-graph-protocol/wp-facebook-ogp.php',                  			// WP Facebook Open Graph protocol
-			'opengraph/opengraph.php',                                              			// Open Graph
-			'sharepress/sharepress.php',                                            			// SharePress
-			'wp-facebook-like-send-open-graph-meta/wp-facebook-like-send-open-graph-meta.php',		// WP Facebook Like Send & Open Graph Meta
-			'network-publisher/networkpub.php',								// Network Publisher
-			'wp-ogp/wp-ogp.php',										// WP-OGP
+			'facebook/facebook.php',                                                								// Official Facebook plugin
+			'wordpress-seo/wp-seo.php',                                             								// WordPress SEO by Yoast
+			'add-link-to-facebook/add-link-to-facebook.php',                        								// Add Link to Facebook
+			'facebook-awd/AWD_facebook.php',                                        								// Facebook AWD All in one
+			'header-footer/plugin.php',                                             								// Header and Footer
+			'nextgen-facebook/nextgen-facebook.php',                                								// NextGEN Facebook OG
+			'seo-facebook-comments/seofacebook.php',                                								// SEO Facebook Comments
+			'seo-ultimate/seo-ultimate.php',                                        								// SEO Ultimate
+			'sexybookmarks/sexy-bookmarks.php',                                     								// Shareaholic
+			'shareaholic/sexy-bookmarks.php',                                       								// Shareaholic
+			'social-discussions/social-discussions.php',                            								// Social Discussions
+			'social-networks-auto-poster-facebook-twitter-g/NextScripts_SNAP.php',									// NextScripts SNAP
+			'wordbooker/wordbooker.php',                                            								// Wordbooker
+			'socialize/socialize.php',                                              								// Socialize
+			'simple-facebook-connect/sfc.php',                                      								// Simple Facebook Connect
+			'social-sharing-toolkit/social_sharing_toolkit.php',                    								// Social Sharing Toolkit
+			'wp-facebook-open-graph-protocol/wp-facebook-ogp.php',                  								// WP Facebook Open Graph protocol
+			'opengraph/opengraph.php',                                              								// Open Graph
+			'sharepress/sharepress.php',                                            								// SharePress
+			'wp-facebook-like-send-open-graph-meta/wp-facebook-like-send-open-graph-meta.php',							// WP Facebook Like Send & Open Graph Meta
+			'network-publisher/networkpub.php',													// Network Publisher
+			'wp-ogp/wp-ogp.php',															// WP-OGP
+			'twitter-cards/twitter-cards.php',													// Twitter Cards
+			'twitter-cards-meta/twitter-cards-meta.php',												// Twitter Cards Meta
+			'ig-twitter-cards/ig-twitter-cards.php',												// IG:Twitter Cards
+			'kevinjohn-gallagher-pure-web-brilliants-social-graph-twitter-cards-extention/kevinjohn_gallagher___social_graph_twitter_output.php',	// Pure Web Brilliant's Social Graph Twitter Cards Extention
+			'jm-twitter-cards/jm-twitter-cards.php',												// JM Twitter Cards
+			'wp-twitter-cards/twitter_cards.php',													// WP Twitter Cards
+			'eewee-twitter-card/index.php',														// eewee twitter card
 		);
 
 		foreach ( $conflicting_plugins as $plugin ) {
@@ -707,6 +714,8 @@ class Jetpack {
 			}
 		}
 
+		$modules = apply_filters( 'jetpack_get_available_modules', $modules, $min_version, $max_version );
+
 		if ( !$min_version && !$max_version ) {
 			return array_keys( $modules );
 		}
@@ -745,6 +754,7 @@ class Jetpack {
 			case 'photon' :
 			case 'tiled-gallery' :
 			case 'likes' :
+			case 'wpcc' :
 				break;
 
 			// These modules are default off if we think the site is a private one
@@ -981,7 +991,7 @@ class Jetpack {
 
 		$module_data = Jetpack::get_module( $module );
 		
-		if ( ! Jetpack::is_active() ) {	
+		if ( ! Jetpack::is_active() ) {
 			if ( ! Jetpack::is_development_mode() )
 				return false;
 
@@ -1365,10 +1375,9 @@ p {
 		}
 
 		$hook = add_menu_page( 'Jetpack', $title, 'read', 'jetpack', array( $this, 'admin_page' ), 'div' );
-		
-		$debugger_hook = add_submenu_page( 'jetpack', 'Jetpack Debugging Center', '', 'manage_options', 'jetpack-debugger', array( $this, 'debugger_page' ) );
-		add_action( "admin_head-$debugger_hook", 'jetpack_debug_admin_head' );
 
+		$debugger_hook = add_submenu_page( null, __( 'Jetpack Debugging Center', 'jetpack' ), '', 'manage_options', 'jetpack-debugger', array( $this, 'debugger_page' ) );
+		add_action( "admin_head-$debugger_hook", array( 'Jetpack_Debugger', 'jetpack_debug_admin_head' ) );
 
 		add_action( "load-$hook", array( $this, 'admin_page_load' ) );
 
@@ -1397,7 +1406,7 @@ p {
 		add_action( "load-$hook",                array( $this, 'admin_help'      ) );
 		add_action( "admin_head-$hook",          array( $this, 'admin_head'      ) );
 		add_action( "admin_print_styles-$hook",  array( $this, 'admin_styles'    ) );
-		add_action( "admin_print_scripts-$hook", array( $this, 'admin_scripts'   ) );		
+		add_action( "admin_print_scripts-$hook", array( $this, 'admin_scripts'   ) );
 	}
 /**/
 	function add_remote_request_handlers() {
@@ -1578,7 +1587,7 @@ p {
 			'<p><strong>' . __( 'For more information:', 'jetpack' ) . '</strong></p>' .
 			'<p><a href="http://jetpack.me/faq/" target="_blank">'     . __( 'Jetpack FAQ',     'jetpack' ) . '</a></p>' .
 			'<p><a href="http://jetpack.me/support/" target="_blank">' . __( 'Jetpack Support', 'jetpack' ) . '</a></p>' .
-			'<p><a href="' . Jetpack::admin_url( array(	'page'   => 'jetpack-debugger' )  ) .'">' . __( 'Jetpack Debugging Center', 'jetpack' ) . '</a></p>' 
+			'<p><a href="' . Jetpack::admin_url( array(	'page'   => 'jetpack-debugger' )  ) .'">' . __( 'Jetpack Debugging Center', 'jetpack' ) . '</a></p>'
 			
 		);
 	}
@@ -1659,7 +1668,7 @@ p {
 			return;
 		?>
 
-		<div id="message" class="updated jetpack-message jp-connect">
+		<div id="message" class="updated jetpack-message jp-connect" style="display:block !important;">
 			<div id="jp-dismiss" class="jetpack-close-button-container">
 				<a class="jetpack-close-button" href="?page=jetpack&jetpack-notice=dismiss" title="<?php _e( 'Dismiss this notice and deactivate Jetpack.', 'jetpack' ); ?>"><?php _e( 'Dismiss this notice and deactivate Jetpack.', 'jetpack' ); ?></a>
 			</div>
@@ -2426,7 +2435,7 @@ p {
 			?>
 				<?php if ( ! $is_connected ) : ?>
 
-				<div id="message" class="updated jetpack-message jp-connect">
+				<div id="message" class="updated jetpack-message jp-connect" style="display:block !important;">
 					<div id="jp-dismiss" class="jetpack-close-button-container">
 						<a class="jetpack-close-button" href="?page=jetpack&jetpack-notice=dismiss" title="<?php _e( 'Dismiss this notice.', 'jetpack' ); ?>"><?php _e( 'Dismiss this notice.', 'jetpack' ); ?></a>
 					</div>
@@ -2444,7 +2453,7 @@ p {
 
 				<?php elseif ( ! $is_user_connected ) : ?>
 
-				<div id="message" class="updated jetpack-message jp-connect">
+				<div id="message" class="updated jetpack-message jp-connect" style="display:block !important;">
 					<div class="jetpack-wrap-container">
 						<div class="jetpack-text-container">
 							<h4>
@@ -2642,7 +2651,7 @@ p {
 		if ( !current_user_can( 'manage_options' ) ) {
 			die( '-1' );
 		}
-		jetpack_debug_display_handler();
+		Jetpack_Debugger::jetpack_debug_display_handler();
 		exit;
 	}
 
@@ -2904,9 +2913,9 @@ p {
 
 	/**
 	 * Checks to see if the URL is using SSL to connect with Jetpack
-	 * 
+	 *
 	 * @since 2.3.3
-	 * @return boolean 
+	 * @return boolean
 	 */
 	public static function permit_ssl( $force_recheck = false ) {
 		// Do some fancy tests to see if ssl is being supported
@@ -2926,7 +2935,7 @@ p {
 						break;
 				}
 
-				// If it's not 'NEVER', test to see 
+				// If it's not 'NEVER', test to see
 				if ( $ssl ) {
 					$response = wp_remote_get( JETPACK__API_BASE . 'test/1/' );
 					if ( is_wp_error( $response ) || ( 'OK' !== wp_remote_retrieve_body( $response ) ) ) {
@@ -3538,7 +3547,8 @@ p {
 	 * Get $content_width, but with a <s>twist</s> filter.
 	 */
 	public static function get_content_width() {
-		return apply_filters( 'jetpack_content_width', $GLOBALS['content_width'] );
+		$content_width = isset( $GLOBALS['content_width'] ) ? $GLOBALS['content_width'] : 0;
+		return apply_filters( 'jetpack_content_width', $content_width );
 	}
 
 	/**
@@ -3548,7 +3558,7 @@ p {
 	 * @param int $size Size of the avatar image
 	 * @param string $default URL to a default image to use if no avatar is available
 	 * @param bool $force_display Whether to force it to return an avatar even if show_avatars is disabled
-	 * 
+	 *
 	 * @return array First element is the URL, second is the class.
 	 */
 	public static function get_avatar_url( $id_or_email, $size = 96, $default = '', $force_display = false ) {

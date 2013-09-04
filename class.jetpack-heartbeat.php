@@ -73,7 +73,7 @@ class Jetpack_Heartbeat {
 
 		$jetpack = Jetpack::init();
 
-		$jetpack->stat( 'active-modules', implode( ',', $this->jetpack->get_active_modules() ) );
+		$jetpack->stat( 'active-modules', implode( ',', $jetpack->get_active_modules() )       );
 		$jetpack->stat( 'active',         JETPACK__VERSION                                     );
 		$jetpack->stat( 'wp-version',     get_bloginfo( 'version' )                            );
 		$jetpack->stat( 'php-version',    PHP_VERSION                                          );
@@ -108,14 +108,14 @@ class Jetpack_Heartbeat {
 	public function add_cron_intervals( $schedules ) {
 		$schedules['jetpack_weekly'] = array(
 		    'interval' => WEEK_IN_SECONDS,
-		    'display' => __('Jetpack weekly')
+		    'display' => __( 'Jetpack weekly', 'jetpack' ),
 		);
 		return $schedules;
 	}
 
 	public function deactivate() {
 		$timestamp = wp_next_scheduled( $this->cron_name );
-		wp_unschedule_event($timestamp, $this->cron_name );
+		wp_unschedule_event( $timestamp, $this->cron_name );
 	}
 
 }
