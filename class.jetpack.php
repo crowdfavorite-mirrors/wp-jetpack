@@ -590,6 +590,8 @@ class Jetpack {
 			'wp-facebook-like-send-open-graph-meta/wp-facebook-like-send-open-graph-meta.php',	// WP Facebook Like Send & Open Graph Meta
 			'network-publisher/networkpub.php',							// Network Publisher
 			'wp-ogp/wp-ogp.php',									// WP-OGP
+			'open-graph-protocol-framework/open-graph-protocol-framework.php',			// Open Graph Protocol Framework
+			'all-in-one-seo-pack/all_in_one_seo_pack.php',						// All in One SEO Pack
 		);
 
 		foreach ( $conflicting_plugins as $plugin ) {
@@ -1882,6 +1884,9 @@ p {
 				#toplevel_page_jetpack .wp-menu-image:before {
 					font-family: 'Jetpack' !important;
 					content: '\\e600';
+				}
+				#toplevel_page_jetpack .wp-menu-image {
+					background-repeat: no-repeat;
 				}
 				#menu-posts-feedback .wp-menu-image:before {
 					font-family: dashicons !important;
