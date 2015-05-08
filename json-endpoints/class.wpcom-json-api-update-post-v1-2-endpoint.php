@@ -1,30 +1,5 @@
 <?php
-class WPCOM_JSON_API_Update_Post_v1_1_Endpoint extends WPCOM_JSON_API_Post_v1_1_Endpoint {
-	function __construct( $args ) {
-		parent::__construct( $args );
-		if ( $this->api->ends_with( $this->path, '/delete' ) ) {
-			$this->post_object_format['status']['deleted'] = 'The post has been deleted permanently.';
-		}
-	}
-
-	// /sites/%s/posts/new       -> $blog_id
-	// /sites/%s/posts/%d        -> $blog_id, $post_id
-	// /sites/%s/posts/%d/delete -> $blog_id, $post_id
-	// /sites/%s/posts/%d/restore -> $blog_id, $post_id
-	function callback( $path = '', $blog_id = 0, $post_id = 0 ) {
-		$blog_id = $this->api->switch_to_blog_and_validate_user( $this->api->get_blog_id( $blog_id ) );
-		if ( is_wp_error( $blog_id ) ) {
-			return $blog_id;
-		}
-
-		if ( $this->api->ends_with( $path, '/delete' ) ) {
-			return $this->delete_post( $path, $blog_id, $post_id );
-		} elseif ( $this->api->ends_with( $path, '/restore' ) ) {
-			return $this->restore_post( $path, $blog_id, $post_id );
-		} else {
-			return $this->write_post( $path, $blog_id, $post_id );
-		}
-	}
+class WPCOM_JSON_API_Update_Post_v1_2_Endpoint extends WPCOM_JSON_API_Update_Post_v1_1_Endpoint {
 
 	// /sites/%s/posts/new       -> $blog_id
 	// /sites/%s/posts/%d        -> $blog_id, $post_id
@@ -63,7 +38,7 @@ class WPCOM_JSON_API_Update_Post_v1_1_Endpoint extends WPCOM_JSON_API_Post_v1_1_
 			}
 
 			if ( ! empty( $input['author'] ) ) {
-				$author_id = $this->parse_and_set_author( $input['author'], $input['type'] );
+				$author_id = parent::parse_and_set_author( $input['author'], $input['type'] );
 				unset( $input['author'] );
 				if ( is_wp_error( $author_id ) )
 					return $author_id;
@@ -101,7 +76,7 @@ class WPCOM_JSON_API_Update_Post_v1_1_Endpoint extends WPCOM_JSON_API_Post_v1_1_
 			}
 
 			if ( ! empty( $input['author'] ) ) {
-				$author_id = $this->parse_and_set_author( $input['author'], $_post_type );
+				$author_id = parent::parse_and_set_author( $input['author'], $_post_type );
 				unset( $input['author'] );
 				if ( is_wp_error( $author_id ) )
 					return $author_id;
@@ -135,8 +110,8 @@ class WPCOM_JSON_API_Update_Post_v1_1_Endpoint extends WPCOM_JSON_API_Post_v1_1_
 			unset( $input['parent'] );
 		}
 
+		/* add taxonomies by name */
 		$tax_input = array();
-
 		foreach ( array( 'categories' => 'category', 'tags' => 'post_tag' ) as $key => $taxonomy ) {
 			if ( ! isset( $input[ $key ] ) ) {
 				continue;
@@ -154,26 +129,16 @@ class WPCOM_JSON_API_Update_Post_v1_1_Endpoint extends WPCOM_JSON_API_Post_v1_1_
 
 			foreach ( $terms as $term ) {
 				/**
-				 * `curl --data 'category[]=123'` should be interpreted as a category ID,
-				 * not a category whose name is '123'.
-				 *
-				 * Consequence: To add a category/tag whose name is '123', the client must
-				 * first look up its ID.
+				 * We assume these are names, not IDs, even if they are numeric.
+				 * Note: A category named "0" will not work right.
+				 * https://core.trac.wordpress.org/ticket/9059
 				 */
-				if ( ctype_digit( $term ) ) {
-					$term = (int) $term;
-				}
-
-				$term_info = term_exists( $term, $taxonomy );
+				$term_info = get_term_by( 'name', $term, $taxonomy, ARRAY_A );
 
 				if ( ! $term_info ) {
-					// A term ID that doesn't already exist. Ignore it: we don't know what name to give it.
-					if ( is_int( $term ) ){
-						continue;
-					}
 					// only add a new tag/cat if the user has access to
 					$tax = get_taxonomy( $taxonomy );
-					if ( !current_user_can( $tax->cap->edit_terms ) ) {
+					if ( ! current_user_can( $tax->cap->edit_terms ) ) {
 						continue;
 					}
 
@@ -186,22 +151,57 @@ class WPCOM_JSON_API_Update_Post_v1_1_Endpoint extends WPCOM_JSON_API_Post_v1_1_
 						$tax_input[$taxonomy][] = (int) $term_info['term_id'];
 					} else {
 						// Tags must be added by name
-						if ( is_int( $term ) ) {
-							$term = get_term( $term, $taxonomy );
-							$tax_input[$taxonomy][] = $term->name;
-						} else {
-							$tax_input[$taxonomy][] = $term;
-						}
+						$tax_input[$taxonomy][] = $term;
 					}
 				}
 			}
 		}
 
-		if ( isset( $input['categories'] ) && empty( $tax_input['category'] ) && 'revision' !== $post_type->name ) {
+		/* add taxonomies by ID */
+		foreach ( array( 'categories_by_id' => 'category', 'tags_by_id' => 'post_tag' ) as $key => $taxonomy ) {
+			if ( ! isset( $input[ $key ] ) ) {
+				continue;
+			}
+
+			// combine with any previous selections
+			if ( ! is_array( $tax_input[ $taxonomy ] ) ) {
+				$tax_input[ $taxonomy ] = array();
+			}
+
+			$is_hierarchical = is_taxonomy_hierarchical( $taxonomy );
+
+			if ( is_array( $input[$key] ) ) {
+				$terms = $input[$key];
+			} else {
+				$terms = explode( ',', $input[$key] );
+			}
+
+			foreach ( $terms as $term ) {
+				if ( ! ctype_digit( $term ) ) {
+					// skip anything that doesn't look like an ID
+					continue;
+				}
+				$term = (int) $term;
+				$term_info = get_term_by( 'id', $term, $taxonomy, ARRAY_A );
+
+				if ( $term_info && ! is_wp_error( $term_info ) ) {
+					if ( $is_hierarchical ) {
+						// Categories must be added by ID
+						$tax_input[$taxonomy][] = $term;
+					} else {
+						// Tags must be added by name
+						$tax_input[$taxonomy][] = $term_info['name'];
+					}
+				}
+			}
+		}
+
+		if ( ( isset( $input['categories'] ) || isset( $input['categories_by_id'] ) )
+			&& empty( $tax_input['category'] ) && 'revision' !== $post_type->name ) {
 			$tax_input['category'][] = get_option( 'default_category' );
 		}
 
-		unset( $input['tags'], $input['categories'] );
+		unset( $input['tags'], $input['categories'], $input['tags_by_id'], $input['categories_by_id'] );
 
 		$insert = array();
 
@@ -471,7 +471,7 @@ class WPCOM_JSON_API_Update_Post_v1_1_Endpoint extends WPCOM_JSON_API_Post_v1_1_
 		set_post_format( $post_id, $insert['post_format'] );
 
 		if ( isset( $featured_image ) ) {
-			$this->parse_and_set_featured_image( $post_id, $delete_featured_image, $featured_image );
+			parent::parse_and_set_featured_image( $post_id, $delete_featured_image, $featured_image );
 		}
 
 		if ( ! empty( $metadata ) ) {
@@ -568,101 +568,5 @@ class WPCOM_JSON_API_Update_Post_v1_1_Endpoint extends WPCOM_JSON_API_Post_v1_1_
 		do_action( 'wpcom_json_api_objects', 'posts' );
 
 		return $return;
-	}
-
-	// /sites/%s/posts/%d/delete -> $blog_id, $post_id
-	function delete_post( $path, $blog_id, $post_id ) {
-		$post = get_post( $post_id );
-		if ( !$post || is_wp_error( $post ) ) {
-			return new WP_Error( 'unknown_post', 'Unknown post', 404 );
-		}
-
-		if ( ! $this->is_post_type_allowed( $post->post_type ) ) {
-			return new WP_Error( 'unknown_post_type', 'Unknown post type', 404 );
-		}
-
-		if ( !current_user_can( 'delete_post', $post->ID ) ) {
-			return new WP_Error( 'unauthorized', 'User cannot delete posts', 403 );
-		}
-
-		$args  = $this->query_args();
-		$return = $this->get_post_by( 'ID', $post->ID, $args['context'] );
-		if ( !$return || is_wp_error( $return ) ) {
-			return $return;
-		}
-
-		do_action( 'wpcom_json_api_objects', 'posts' );
-
-		wp_delete_post( $post->ID );
-
-		$status = get_post_status( $post->ID );
-		if ( false === $status ) {
-			$return['status'] = 'deleted';
-			return $return;
-		}
-
-		return $this->get_post_by( 'ID', $post->ID, $args['context'] );
-	}
-
-	// /sites/%s/posts/%d/restore -> $blog_id, $post_id
-	function restore_post( $path, $blog_id, $post_id ) {
-		$args  = $this->query_args();
-		$post = get_post( $post_id );
-
-		if ( !$post || is_wp_error( $post ) ) {
-			return new WP_Error( 'unknown_post', 'Unknown post', 404 );
-		}
-
-		if ( !current_user_can( 'delete_post', $post->ID ) ) {
-			return new WP_Error( 'unauthorized', 'User cannot restore trashed posts', 403 );
-		}
-
-		do_action( 'wpcom_json_api_objects', 'posts' );
-
-		wp_untrash_post( $post->ID );
-
-		return $this->get_post_by( 'ID', $post->ID, $args['context'] );
-	}
-
-	protected function parse_and_set_featured_image( $post_id, $delete_featured_image, $featured_image ) {
-		if ( $delete_featured_image ) {
-			delete_post_thumbnail( $post_id );
-			return;
-		}
-
-		$featured_image = (string) $featured_image;
-
-		// if we got a post ID, we can just set it as the thumbnail
-		if ( ctype_digit( $featured_image ) && 'attachment' == get_post_type( $featured_image ) ) {
-			set_post_thumbnail( $post_id, $featured_image );
-			return $featured_image;
-		}
-
-		$featured_image_id = $this->handle_media_sideload( $featured_image, $post_id );
-
-		if ( empty( $featured_image_id ) || ! is_int( $featured_image_id ) )
-			return false;
-
-		set_post_thumbnail( $post_id, $featured_image_id );
-		return $featured_image_id;
-	}
-
-	protected function parse_and_set_author( $author = null, $post_type = 'post' ) {
-		if ( empty( $author ) || ! post_type_supports( $post_type, 'author' ) )
-			return get_current_user_id();
-
-		if ( ctype_digit( $author ) ) {
-			$_user = get_user_by( 'id', $author );
-			if ( ! $_user || is_wp_error( $_user ) )
-				return new WP_Error( 'invalid_author', 'Invalid author provided' );
-
-			return $_user->ID;
-		}
-
-		$_user = get_user_by( 'login', $author );
-		if ( ! $_user || is_wp_error( $_user ) )
-			return new WP_Error( 'invalid_author', 'Invalid author provided' );
-
-		return $_user->ID;
 	}
 }
