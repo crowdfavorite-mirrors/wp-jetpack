@@ -65,7 +65,7 @@
 
 		// Hide the successful connection message after a little bit
 		setTimeout( function(){
-			jQuery( '.jetpack-message:not(.stay-visible)' ).hide( 600 );
+			jQuery( '.jetpack-message:not( .stay-visible, .jetpack-err )' ).hide( 600 );
 		}, 6000);
 
 		// Modal events
@@ -200,8 +200,8 @@
 			}
 		});
 
-		// Apply new height
-		module.css( 'height', tallest + 'px' );
+		// Apply new height plus 20 pixels
+		module.css( 'height', ( parseInt( tallest, 10 ) + 5 ) + 'px' );
 	}
 
 	/*

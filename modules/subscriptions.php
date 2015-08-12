@@ -61,7 +61,7 @@ class Jetpack_Subscriptions {
 		return $instance;
 	}
 
-	function Jetpack_Subscriptions() {
+	function __construct() {
 		$this->jetpack = Jetpack::init();
 
 		// Don't use COOKIEHASH as it could be shared across installs && is non-unique in multisite.
@@ -560,11 +560,11 @@ Jetpack_Subscriptions::init();
  */
 
 class Jetpack_Subscriptions_Widget extends WP_Widget {
-	function Jetpack_Subscriptions_Widget() {
+	function __construct() {
 		$widget_ops  = array( 'classname' => 'jetpack_subscription_widget', 'description' => __( 'Add an email signup form to allow people to subscribe to your blog.', 'jetpack' ) );
 		$control_ops = array( 'width' => 300 );
 
-		$this->WP_Widget( 'blog_subscription', __( 'Blog Subscriptions (Jetpack)', 'jetpack' ), $widget_ops, $control_ops );
+		parent::__construct( 'blog_subscription', __( 'Blog Subscriptions (Jetpack)', 'jetpack' ), $widget_ops, $control_ops );
 	}
 
 	function widget( $args, $instance ) {
@@ -635,20 +635,19 @@ class Jetpack_Subscriptions_Widget extends WP_Widget {
 		} else { ?>
 			<form action="#" method="post" accept-charset="utf-8" id="subscribe-blog-<?php echo $widget_id; ?>">
 				<?php
-				if ( ! isset ( $_GET['subscribe'] ) ) {
+				if ( ! isset ( $_GET['subscribe'] ) || 'success' != $_GET['subscribe'] ) {
 					?><div id="subscribe-text"><?php echo wpautop( str_replace( '[total-subscribers]', number_format_i18n( $subscribers_total['value'] ), $subscribe_text ) ); ?></div><?php
 				}
 
 				if ( $show_subscribers_total && 0 < $subscribers_total['value'] ) {
 					echo wpautop( sprintf( _n( 'Join %s other subscriber', 'Join %s other subscribers', $subscribers_total['value'], 'jetpack' ), number_format_i18n( $subscribers_total['value'] ) ) );
 				}
-
-				if ( ! isset ( $_GET['subscribe'] ) ) { ?>
+				if ( ! isset ( $_GET['subscribe'] ) || 'success' != $_GET['subscribe'] ) { ?>
 					<p id="subscribe-email">
 						<label id="jetpack-subscribe-label" for="<?php echo esc_attr( $subscribe_field_id ); ?>">
 							<?php echo !empty( $subscribe_placeholder ) ? esc_html( $subscribe_placeholder ) : esc_html__( 'Email Address:', 'jetpack' ); ?>
 						</label>
-						<input type="email" name="email" required="required" class="required" value="<?php echo esc_attr( $subscribe_email ); ?>" id="<?php echo esc_attr( $subscribe_field_id ); ?>" placeholder="<?php echo esc_attr( $subscribe_placeholder ); ?>" />
+						<input type="email" name="email" required="required" class="required" value="<?php echo esc_attr( $subscribe_email ); ?>" id="<?php echo esc_attr( $subscribe_field_id ) . '-' . esc_attr( $widget_id ); ?>" placeholder="<?php echo esc_attr( $subscribe_placeholder ); ?>" />
 					</p>
 
 					<p id="subscribe-submit">
@@ -667,25 +666,41 @@ class Jetpack_Subscriptions_Widget extends WP_Widget {
 			</form>
 
 			<script>
-				( function( d ) {
-					if ( ( 'placeholder' in d.createElement( 'input' ) ) ) {
-						var label = d.getElementById( 'jetpack-subscribe-label' );
-	 					label.style.clip 	 = 'rect(1px, 1px, 1px, 1px)';
-	 					label.style.position = 'absolute';
-	 					label.style.height   = '1px';
-	 					label.style.width    = '1px';
-	 					label.style.overflow = 'hidden';
-					}
-				} ) ( document );
+			/*
+			Custom functionality for safari and IE
+			 */
+			(function( d ) {
+				// Creates placeholders for IE
+				if ( ( 'placeholder' in d.createElement( 'input' ) ) ) {
+					var label = d.getElementById( 'jetpack-subscribe-label' );
+						label.style.clip 	 = 'rect(1px, 1px, 1px, 1px)';
+						label.style.position = 'absolute';
+						label.style.height   = '1px';
+						label.style.width    = '1px';
+						label.style.overflow = 'hidden';
+				}
 
-				// Special check for required email input because Safari doesn't support HTML5 "required"
-				jQuery( '#subscribe-blog-<?php echo $widget_id; ?>' ).submit( function( event ) {
-					var requiredInput = jQuery( this ).find( '.required' );
-					if ( requiredInput.val() == '' ) {
-						event.preventDefault();
-						requiredInput.focus();
-					}
-				});
+				// Make sure the email value is filled in before allowing submit
+				var form = d.getElementById('subscribe-blog-<?php echo $widget_id; ?>'), 
+					input = d.getElementById('<?php echo esc_attr( $subscribe_field_id ) . '-' . esc_attr( $widget_id ); ?>'),
+					handler = function( event ) {
+						if ( '' === input.value ) {
+							input.focus();
+							
+							if ( event.preventDefault ){
+								event.preventDefault();
+							}
+							
+							return false; 
+						}
+					}; 
+			
+				if ( window.addEventListener ) {
+					form.addEventListener( 'submit', handler, false );
+				} else {
+					form.attachEvent( 'onsubmit', handler );
+				}
+			})( document );
 			</script>
 		<?php } ?>
 		<?php
