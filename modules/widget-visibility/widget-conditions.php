@@ -156,7 +156,9 @@ class Jetpack_Widget_Conditions {
 				foreach ( $taxonomies as $taxonomy ) {
 					?>
 					<optgroup label="<?php esc_attr_e( $taxonomy->labels->name . ':', 'jetpack' ); ?>">
-						<option value="<?php echo esc_attr( $taxonomy->name ); ?>" <?php selected( $taxonomy->name, $minor ); ?>><?php echo 'All ' . esc_html( $taxonomy->name ) . ' pages'; ?></option>
+						<option value="<?php echo esc_attr( $taxonomy->name ); ?>" <?php selected( $taxonomy->name, $minor ); ?>>
+							<?php _e( 'All pages', 'jetpack' ); ?>
+						</option>
 					<?php
 
 					$terms = get_terms( array( $taxonomy->name ), array( 'number' => 250, 'hide_empty' => false ) );
@@ -342,6 +344,8 @@ class Jetpack_Widget_Conditions {
 			/**
 			 * Fires after the widget visibility conditions are saved.
 			 *
+			 * @module widget-visibility
+			 *
 			 * @since 2.4.0
 			 */
 			do_action( 'widget_conditions_save' );
@@ -350,6 +354,8 @@ class Jetpack_Widget_Conditions {
 
 			/**
 			 * Fires after the widget visibility conditions are deleted.
+			 *
+			 * @module widget-visibility
 			 *
 			 * @since 2.4.0
 			 */
@@ -521,7 +527,7 @@ class Jetpack_Widget_Conditions {
 								$condition_result = true;
 							} else {
 								$tag = get_tag( $rule['minor'] );
-								if ( $tag && ! is_wp_error( $tag ) && is_tag( $tag->slug ) ) {
+								if ( $tag && is_tag( $tag->slug ) ) {
 									$condition_result = true;
 								}
 							}

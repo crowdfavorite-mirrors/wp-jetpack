@@ -5,8 +5,6 @@
  * jetpack_module_more_info_<module-slug> hooks are for pre-connection information
  * jetpack_module_more_info_connected_<module-slug> hooks are used once the user
  * 		is connected to show them links to admin panels, usage info etc.
- * jetpack_search_terms_<module-slug> filters are searchable from the settings page.
- *      Separate your search terms by comma, and please send translation context with _x()
  */
 
 // VaultPress (stub)
@@ -21,7 +19,7 @@ function vaultpress_jetpack_more_info() {
 
 	<div class="jp-info-img">
 		<a href="<?php echo $vaultpress_url?>">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/vaultpress.png' ) ?>" alt="<?php esc_attr_e( 'VaultPress', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/vaultpress.jpg' ) ?>" alt="<?php esc_attr_e( 'VaultPress', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 
@@ -51,7 +49,7 @@ add_filter( 'jetpack_learn_more_button_vaultpress', 'vaultpress_jetpack_load_mor
 function grofiles_more_info() { ?>
 	<div class="jp-info-img">
 		<a href="http://blog.gravatar.com/2010/10/06/gravatar-hovercards-on-wordpress-com/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/hovercards.png' ) ?>" alt="<?php esc_attr_e( 'Gravatar Hovercard', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/hovercards.jpg' ) ?>" alt="<?php esc_attr_e( 'Gravatar Hovercard', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 
@@ -65,7 +63,7 @@ add_action( 'jetpack_module_more_info_gravatar-hovercards', 'grofiles_more_info'
 function grofiles_more_info_connected() { ?>
 	<div class="jp-info-img">
 		<a href="http://blog.gravatar.com/2010/10/06/gravatar-hovercards-on-wordpress-com/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/hovercards.png' ) ?>" alt="<?php esc_attr_e( 'Gravatar Hovercard', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/hovercards.jpg' ) ?>" alt="<?php esc_attr_e( 'Gravatar Hovercard', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 
@@ -86,7 +84,7 @@ add_filter( 'jetpack_learn_more_button_gravatar-hovercards', 'grofiles_load_more
 function jetpack_shortcodes_more_info() { ?>
 	<div class="jp-info-img">
 		<a href="http://en.support.wordpress.com/shortcodes/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/shortcodes.png' ) ?>" alt="<?php esc_attr_e( 'Shortcode Embeds', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/shortcodes.jpg' ) ?>" alt="<?php esc_attr_e( 'Shortcode Embeds', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 
@@ -98,7 +96,7 @@ add_action( 'jetpack_module_more_info_shortcodes', 'jetpack_shortcodes_more_info
 function jetpack_shortcodes_more_info_connected() { ?>
 	<div class="jp-info-img">
 		<a href="http://en.support.wordpress.com/shortcodes/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/shortcodes.png' ) ?>" alt="<?php esc_attr_e( 'Shortcode Embeds', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/shortcodes.jpg' ) ?>" alt="<?php esc_attr_e( 'Shortcode Embeds', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 
@@ -113,6 +111,7 @@ function jetpack_shortcodes_more_info_connected() { ?>
 		'flickr' => 'http://support.wordpress.com/videos/flickr-video/',
 		'gist' => 'http://en.support.wordpress.com/gist/',
 		'googlemaps' => 'http://support.wordpress.com/google-maps/',
+		'instagram' => 'https://en.support.wordpress.com/instagram/instagram-images/', 
 		'jetpack_subscription_form' => 'http://jetpack.me/support/subscriptions/#display',
 		'polldaddy' => 'http://support.polldaddy.com/wordpress-shortcodes/',
 		'presentation' => 'http://en.support.wordpress.com/presentations/',
@@ -152,7 +151,7 @@ add_filter( 'jetpack_learn_more_button_shortcodes', 'jetpack_shortcodes_load_mor
 function wpme_more_info() { ?>
 	<div class="jp-info-img">
 		<a href="http://wp.me/sf2B5-shorten">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/shortlinks.png' ) ?>" alt="<?php esc_attr_e( 'WP.me Shortlinks', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/shortlinks.jpg' ) ?>" alt="<?php esc_attr_e( 'WP.me Shortlinks', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 
@@ -165,7 +164,7 @@ add_action( 'jetpack_module_more_info_shortlinks', 'wpme_more_info' );
 function wpme_more_info_connected() { ?>
 	<div class="jp-info-img">
 		<a href="http://wp.me/sf2B5-shorten">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/shortlinks.png' ) ?>" alt="<?php esc_attr_e( 'WP.me Shortlinks', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/shortlinks.jpg' ) ?>" alt="<?php esc_attr_e( 'WP.me Shortlinks', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 
@@ -185,7 +184,7 @@ add_filter( 'jetpack_learn_more_button_shortlinks', 'wpme_load_more_link' );
 function stats_more_info() { ?>
 	<div class="jp-info-img">
 		<a href="http://en.support.wordpress.com/stats/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/stats.png' ) ?>" alt="<?php esc_attr_e( 'Site Stats', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/stats.jpg' ) ?>" alt="<?php esc_attr_e( 'Site Stats', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 
@@ -197,7 +196,7 @@ add_action( 'jetpack_module_more_info_stats', 'stats_more_info' );
 function stats_more_info_connected() { ?>
 	<div class="jp-info-img">
 		<a href="http://en.support.wordpress.com/stats/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/stats.png' ) ?>" alt="<?php esc_attr_e( 'Site Stats', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/stats.jpg' ) ?>" alt="<?php esc_attr_e( 'Site Stats', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 
@@ -212,17 +211,12 @@ function stats_load_more_link( $description ) {
 }
 add_filter( 'jetpack_learn_more_button_stats', 'stats_load_more_link' );
 
-function jetpack_stats_search_terms( $terms ) {
-	$terms = _x( 'statistics, tracking, analytics, views, traffic', 'search terms', 'jetpack' );
-	return $terms;
-}
-add_filter( 'jetpack_search_terms_stats', 'jetpack_stats_search_terms' );
 
 // Publicize
 function publicize_more_info() { ?>
 	<div class="jp-info-img">
 		<a href="http://en.support.wordpress.com/publicize/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/publicize.png' ) ?>" alt="<?php esc_attr_e( 'Publicize', 'jetpack' ) ?>" width="328" height="123" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/publicize.jpg' ) ?>" alt="<?php esc_attr_e( 'Publicize', 'jetpack' ) ?>" width="328" height="123" />
 		</a>
 	</div>
 
@@ -251,7 +245,7 @@ add_filter( 'jetpack_learn_more_button_publicize', 'publicize_load_more_link' );
 function notes_more_info() { ?>
 	<div class="jp-info-img">
 		<a href="http://support.wordpress.com/notifications/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/notes.png' ) ?>" alt="<?php esc_attr_e( 'Notifications', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/notes.jpg' ) ?>" alt="<?php esc_attr_e( 'Notifications', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 
@@ -263,7 +257,7 @@ add_action( 'jetpack_module_more_info_notes', 'notes_more_info' );
 function notes_more_info_connected() { ?>
 	<div class="jp-info-img">
 		<a href="http://support.wordpress.com/notifications/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/notes.png' ) ?>" alt="<?php esc_attr_e( 'Notifications', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/notes.jpg' ) ?>" alt="<?php esc_attr_e( 'Notifications', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 
@@ -283,7 +277,7 @@ add_filter( 'jetpack_learn_more_button_notes', 'notes_load_more_link' );
 function latex_more_info() { ?>
 	<div class="jp-info-img">
 		<a href="http://support.wordpress.com/latex/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/beautifulmath.png' ) ?>" alt="<?php esc_attr_e( 'LaTeX', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/beautifulmath.jpg' ) ?>" alt="<?php esc_attr_e( 'LaTeX', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 
@@ -297,7 +291,7 @@ add_action( 'jetpack_module_more_info_latex', 'latex_more_info' );
 function latex_more_info_connected() { ?>
 	<div class="jp-info-img">
 		<a href="http://support.wordpress.com/latex/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/beautifulmath.png' ) ?>" alt="<?php esc_attr_e( 'LaTeX', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/beautifulmath.jpg' ) ?>" alt="<?php esc_attr_e( 'LaTeX', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 
@@ -317,7 +311,7 @@ add_filter( 'jetpack_learn_more_button_latex', 'latex_load_more_link' );
 function sharedaddy_more_info() { ?>
 	<div class="jp-info-img">
 		<a href="http://en.support.wordpress.com/sharing/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/sharing.png' ) ?>" alt="<?php esc_attr_e( 'Sharing', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/sharing.jpg' ) ?>" alt="<?php esc_attr_e( 'Sharing', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 	<p><?php esc_html_e( 'Share your posts with Twitter, Facebook, and a host of other services. You can configure services to appear as icons, text, or both. Some services have additional options to display smart buttons, such as Twitter, which will update the number of times the post has been shared.', 'jetpack' ); ?></p>
@@ -366,7 +360,7 @@ add_filter( 'jetpack_learn_more_button_sharedaddy', 'sharedaddy_load_more_link' 
 function jpatd_more_info() { ?>
 	<div class="jp-info-img">
 		<a href="http://en.support.wordpress.com/proofreading/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/spelling.png' ) ?>" alt="<?php esc_attr_e( 'Spelling and Grammar', 'jetpack' ) ?>" width="300" height="150" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/spelling.jpg' ) ?>" alt="<?php esc_attr_e( 'Spelling and Grammar', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
 
@@ -385,7 +379,7 @@ add_filter( 'jetpack_learn_more_button_after-the-deadline', 'jpatd_load_more_lin
 // RSS Links Widget, Image Widget, Twitter Widget
 function jetpack_widgets_more_info() { ?>
 	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/widgets.png' ) ?>" alt="<?php esc_attr_e( 'Widgets Screenshot', 'jetpack' ) ?>" width="300" height="150" />
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/widgets.jpg' ) ?>" alt="<?php esc_attr_e( 'Widgets Screenshot', 'jetpack' ) ?>" width="300" height="150" />
 	</div>
 
 	<p><strong><?php esc_html_e( 'The RSS Links Widget ', 'jetpack' ); ?></strong> <?php esc_html_e( "allows you to add links to your blog&#8217;s post and comment RSS feeds in your sidebar. This makes it easy for your readers to stay updated when you post new content or receive new comments.", 'jetpack' ) ?></p>
@@ -397,7 +391,7 @@ add_action( 'jetpack_module_more_info_widgets', 'jetpack_widgets_more_info' );
 
 function jetpack_widgets_more_info_connected() { ?>
 	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/widgets.png' ) ?>" alt="<?php esc_attr_e( 'Widgets Screenshot', 'jetpack' ) ?>" width="300" height="150" />
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/widgets.jpg' ) ?>" alt="<?php esc_attr_e( 'Widgets Screenshot', 'jetpack' ) ?>" width="300" height="150" />
 	</div>
 
 	<p><?php printf( __( '<strong>The Twitter Widget</strong> shows your latest tweets within a sidebar on your theme.', 'jetpack' ) ); ?></p>
@@ -422,7 +416,7 @@ add_filter( 'jetpack_learn_more_button_widgets', 'jetpack_widgets_load_more_link
 // Subscriptions
 function jetpack_subscriptions_more_info() { ?>
 	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/subscriptions.png' ) ?>" alt="<?php esc_attr_e( 'Subsriptions Screenshot', 'jetpack' ) ?>" width="300" height="150" />
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/subscriptions.jpg' ) ?>" alt="<?php esc_attr_e( 'Subsriptions Screenshot', 'jetpack' ) ?>" width="300" height="150" />
 	</div>
 
 	<p><?php esc_html_e( 'Easily allow any visitor to subscribe to all of your posts via email through a widget in your blog&#8217;s sidebar.  Every time you publish a post, WordPress.com will send a notification to all your subscribers.', 'jetpack' ); ?></p>
@@ -476,11 +470,6 @@ function jetpack_protect_more_link() {
 }
 add_action( 'jetpack_learn_more_button_protect', 'jetpack_protect_more_link' );
 
-function jetpack_protect_search_terms( $terms ) {
-	$terms = _x( 'security, secure, protection, botnet, brute force', 'search terms', 'jetpack' );
-	return $terms;
-}
-add_filter( 'jetpack_search_terms_protect', 'jetpack_protect_search_terms' );
 
 // JSON API
 function jetpack_json_api_more_info() { ?>
@@ -507,7 +496,7 @@ function jetpack_contact_form_learn_more_button() {
 function jetpack_contact_form_more_info() {
 	echo '<div class="jp-info-img">';
 	echo '<a href="http://support.wordpress.com/contact-form/">';
-	echo '<img class="jp-info-img" src="' . plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/contactform.png' ) . '" alt="' . esc_attr__( 'Contact Form', 'jetpack' ) . '" width="300" height="150" />';
+	echo '<img class="jp-info-img" src="' . plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/contactform.jpg' ) . '" alt="' . esc_attr__( 'Contact Form', 'jetpack' ) . '" width="300" height="150" />';
 	echo '</a>';
 	echo '</div>';
 
@@ -533,7 +522,7 @@ function jetpack_comments_learn_more_button() {
 function jetpack_comments_more_info() {
 ?>
 	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/comments.png' ) ?>" alt="<?php esc_attr_e( 'Comments Screenshot', 'jetpack' ) ?>" width="300" height="150" />
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/comments.jpg' ) ?>" alt="<?php esc_attr_e( 'Comments Screenshot', 'jetpack' ) ?>" width="300" height="150" />
 	</div>
 
 	<p><?php esc_html_e( 'Comments enables your visitors to use their WordPress.com, Twitter, or Facebook accounts when commenting on your site.', 'jetpack' ); ?></p>
@@ -562,7 +551,7 @@ function jetpack_carousel_learn_more_button() {
 function jetpack_carousel_more_info() {
 ?>
 	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/carousel.png' ) ?>" alt="<?php esc_attr_e( 'Gallery Carousel Screenshot', 'jetpack' ) ?>" width="300" height="188" />
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/carousel.jpg' ) ?>" alt="<?php esc_attr_e( 'Gallery Carousel Screenshot', 'jetpack' ) ?>" width="300" height="188" />
 	</div>
 
 	<p><?php esc_html_e( 'With Carousel active, any standard WordPress galleries you have embedded in posts or pages will launch a gorgeous full-screen photo browsing experience with comments and EXIF metadata.', 'jetpack' ); ?></p>
@@ -578,7 +567,7 @@ add_action( 'jetpack_module_more_info_connected_carousel', 'jetpack_carousel_mor
 function jetpack_custom_css_more_info() {
 	?>
 	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/custom-css.png' ) ?>" alt="<?php esc_attr_e( 'Custom CSS', 'jetpack' ) ?>" width="300" height="150" />
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/custom-css.jpg' ) ?>" alt="<?php esc_attr_e( 'Custom CSS', 'jetpack' ) ?>" width="300" height="150" />
 	</div>
 
 	<p><?php esc_html_e( "The Custom CSS editor gives you the ability to add to or replace your theme's CSS, all while supplying syntax coloring, auto-indentation, and immediate feedback on the validity of the CSS you're writing.", 'jetpack' ); ?></p>
@@ -599,7 +588,7 @@ add_action( 'jetpack_module_more_info_custom-css', 'jetpack_custom_css_more_info
 function jetpack_minileven_more_info() {
 	?>
 	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/mobile-theme.png' ) ?>" alt="<?php esc_attr_e( 'Mobile Theme', 'jetpack' ) ?>" width="300" height="150" />
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/mobile-theme.jpg' ) ?>" alt="<?php esc_attr_e( 'Mobile Theme', 'jetpack' ) ?>" width="300" height="150" />
 	</div>
 
 	<p><?php esc_html_e( "There's a good chance that visitors to your site will be using a smartphone, and it's important to provide them with a great reading experience while on the small screen.", 'jetpack' ); ?></p>
@@ -667,7 +656,7 @@ add_action( 'jetpack_learn_more_button_infinite-scroll', 'jetpack_infinite_scrol
 // Post by Email: START
 function jetpack_post_by_email_more_info() { ?>
 	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/post-by-email.png' ) ?>" alt="<?php esc_attr_e( 'Post by Email', 'jetpack' ) ?>" width="300" height="115" />
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/post-by-email.jpg' ) ?>" alt="<?php esc_attr_e( 'Post by Email', 'jetpack' ) ?>" width="300" height="115" />
 	</div>
 
 	<p><?php esc_html_e( 'Post by Email is a way of publishing posts on your blog by email. Any email client can be used to send the email, allowing you to publish quickly and easily from devices such as cell phones.', 'jetpack' ); ?></p>
@@ -718,7 +707,7 @@ add_action( 'jetpack_learn_more_button_photon', 'jetpack_photon_more_link' );
 // Tiled Galleries: START
 function jetpack_tiled_gallery_more_info() { ?>
 	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/tiled-gallery.png' ) ?>" alt="<?php esc_attr_e( 'Tiled Galleries', 'jetpack' ) ?>" width="300" height="150" />
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/tiled-gallery.jpg' ) ?>" alt="<?php esc_attr_e( 'Tiled Galleries', 'jetpack' ) ?>" width="300" height="150" />
 	</div>
 
 	<p><?php esc_html_e( 'Create elegant magazine-style mosaic layouts for your photos without having to use an external graphic editor.', 'jetpack' ); ?></p>
@@ -739,7 +728,7 @@ function jetpack_likes_more_info() { ?>
 
 	<div class="jp-info-img">
 		<a href="http://jetpack.me/support/likes/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/likes.png' ) ?>" alt="<?php esc_attr_e( 'Likes', 'jetpack' ) ?>" width="323" height="69" />
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/likes.jpg' ) ?>" alt="<?php esc_attr_e( 'Likes', 'jetpack' ) ?>" width="323" height="69" />
 		</a>
 	</div>
 
@@ -871,7 +860,7 @@ function jetpack_related_posts_more_info() {
 EOT;
 	printf(
 		$template,
-		plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/related-posts.png' ),
+		plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/related-posts.jpg' ),
 		esc_attr__( 'Related Posts', 'jetpack' ),
 		esc_html__( '"Related Posts" shows additional relevant links from your site under your posts. If the feature is enabled, links appear underneath your Sharing Buttons and WordPress.com Likes (if you’ve turned these on).', 'jetpack' ),
 		esc_html__( 'More information on using Related Posts.', 'jetpack' )
@@ -894,7 +883,7 @@ function jetpack_related_posts_more_info_connected() {
 EOT;
 	printf(
 		$template,
-		plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/related-posts.png' ),
+		plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/related-posts.jpg' ),
 		esc_attr__( 'Related Posts', 'jetpack' ),
 		esc_html__( '"Related Posts" shows additional relevant links from your site under your posts. If the feature is enabled, links appear underneath your Sharing Buttons and WordPress.com Likes (if you’ve turned these on).', 'jetpack' ),
 		esc_html__( 'More information on using Related Posts.', 'jetpack' ),
@@ -927,7 +916,7 @@ add_action( 'jetpack_learn_more_button_markdown', 'jetpack_markdown_more_link' )
 // Site Verification Tools: START
 function jetpack_verification_tools_more_info() { ?>
 	<p><?php esc_html_e( 'Use these tools to verify that you own/control your website with other external services like Google, Bing and Pinterest.', 'jetpack' ); ?></p>
-	<p><?php printf( __( "Verifying your site allows you to access advanced features on these other services (e.g. Webmaster tools, or getting a verified badge). We'll just add an invisible %s tag to the source code of your homepage.", 'jetpack' ), '<code>meta</code>' ); ?></p>
+	<p><?php printf( __( "Verifying your site allows you to access advanced features on these other services (e.g. Webmaster tools, Google Search Console, or getting a verified badge). We'll just add an invisible %s tag to the source code of your homepage.", 'jetpack' ), '<code>meta</code>' ); ?></p>
 <?php
 }
 add_action( 'jetpack_module_more_info_verification-tools', 'jetpack_verification_tools_more_info' );
@@ -942,7 +931,7 @@ add_action( 'jetpack_learn_more_button_verification-tools', 'jetpack_verificatio
 function jetpack_custom_content_types_more_info() { ?>
 
 	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/custom-content-types.png' ) ?>" alt="<?php esc_attr_e( 'Custom Content Type', 'jetpack' ) ?>" width="300" height="150" />
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/custom-content-types.jpg' ) ?>" alt="<?php esc_attr_e( 'Custom Content Type', 'jetpack' ) ?>" width="300" height="150" />
 	</div>
 
 	<p><?php esc_html_e( 'Organize and display different types of content on your site, separate from posts and pages.', 'jetpack' ); ?></p>
@@ -995,7 +984,7 @@ function jetpack_custom_jetpack_manage() { ?>
 
 
 	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/manage.png' ) ?>" alt="<?php esc_attr_e( 'Manage all of your WordPress sites, self-hosted or not, from WordPress.com', 'jetpack' ) ?>" width="300" height="150" />
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/manage.jpg' ) ?>" alt="<?php esc_attr_e( 'Manage all of your WordPress sites, self-hosted or not, from WordPress.com', 'jetpack' ) ?>" width="300" height="150" />
 	</div>
 
 	<p><em><?php esc_html_e( 'Enabling Manage allows you to update your self-hosted WordPress sites along with any WordPress.com sites you have, all in one simple dashboard.', 'jetpack' ); ?></em></p>

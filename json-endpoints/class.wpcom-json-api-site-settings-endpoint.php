@@ -33,6 +33,8 @@ class WPCOM_JSON_API_Site_Settings_Endpoint extends WPCOM_JSON_API_Endpoint {
 			/**
 			 * Fires on each GET request to a specific endpoint.
 			 *
+			 * @module json-api
+			 *
 			 * @since 3.2.0
 			 *
 			 * @param string sites.
@@ -124,6 +126,11 @@ class WPCOM_JSON_API_Site_Settings_Endpoint extends WPCOM_JSON_API_Endpoint {
 					$eventbrite_api_token = null;
 				}
 
+				$holiday_snow = false;
+				if ( function_exists( 'jetpack_holiday_snow_option_name' ) ) {
+					$holiday_snow = (bool) get_option( jetpack_holiday_snow_option_name() );
+				}
+
 				$response[$key] = array(
 
 					// also exists as "options"
@@ -170,6 +177,7 @@ class WPCOM_JSON_API_Site_Settings_Endpoint extends WPCOM_JSON_API_Endpoint {
 					'twitter_via'             => (string) get_option( 'twitter_via' ),
 					'jetpack-twitter-cards-site-tag' => (string) get_option( 'jetpack-twitter-cards-site-tag' ),
 					'eventbrite_api_token'    => $eventbrite_api_token,
+					'holidaysnow'             => $holiday_snow
 				);
 
 				if ( class_exists( 'Sharing_Service' ) ) {
@@ -206,6 +214,8 @@ class WPCOM_JSON_API_Site_Settings_Endpoint extends WPCOM_JSON_API_Endpoint {
 		// specs that get passed in when this class is instantiated
 		/**
 		 * Filters the settings to be updated on the site.
+		 *
+		 * @module json-api
 		 *
 		 * @since 3.6.0
 		 *
@@ -288,6 +298,8 @@ class WPCOM_JSON_API_Site_Settings_Endpoint extends WPCOM_JSON_API_Endpoint {
 					}
 
 					$enabled_or_disabled = $wga['code'] ? 'enabled' : 'disabled';
+
+					/** This action is documented in modules/widgets/social-media-icons.php */
 					do_action( 'jetpack_bump_stats_extras', 'google-analytics', $enabled_or_disabled );
 
 					$business_plugins = WPCOM_Business_Plugins::instance();
@@ -325,6 +337,16 @@ class WPCOM_JSON_API_Site_Settings_Endpoint extends WPCOM_JSON_API_Endpoint {
 						}
 					}
 					break;
+
+				case 'holidaysnow':
+					if ( empty( $value ) || WPCOM_JSON_API::is_falsy( $value ) ) {
+						if ( function_exists( 'jetpack_holiday_snow_option_name' ) && delete_option( jetpack_holiday_snow_option_name() ) ) {
+							$updated[ $key ] = false;
+						}
+ 					} else if ( function_exists( 'jetpack_holiday_snow_option_name' ) && update_option( jetpack_holiday_snow_option_name(), 'letitsnow' ) ) {
+						$updated[ $key ] = true;
+ 					}
+ 					break;
 
 				// no worries, we've already whitelisted and casted arguments above
 				default:

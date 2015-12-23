@@ -48,7 +48,7 @@ function wufoo_shortcode( $atts ) {
 	$js_embed .= "'formHash':'$formhash', ";
 	$js_embed .= "'autoResize':".(bool)( $autoresize ).",";
 	$js_embed .= "'height':'". (int) $height ."',";
-	$js_embed .= "'header':'".esc_attr( $header )."' ";
+	$js_embed .= "'header':'".esc_js( $header )."' ";
 
 	/**
 	* Only output SSL value if passes as param
@@ -69,6 +69,7 @@ function wufoo_shortcode( $atts ) {
 	$iframe_embed .= '<a href="https://'. $username .'.wufoo.com/forms/'. $formhash .'/" ';
 	$iframe_embed .= 'rel="nofollow">Fill out my Wufoo form!</a></iframe>';
 
+	/** This action is already documented in modules/widgets/gravatar-profile.php */
 	do_action( 'jetpack_stats_extra', 'embeds', 'wufoo' );
 
 	/**
