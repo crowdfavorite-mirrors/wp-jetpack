@@ -132,8 +132,11 @@ class Jetpack_Carousel {
 			// Bail because someone is overriding the [gallery] shortcode.
 			remove_filter( 'gallery_style', array( $this, 'add_data_to_container' ) );
 			remove_filter( 'wp_get_attachment_image_attributes', array( $this, 'add_data_to_images' ) );
-			// Display message that carousel has bailed, if user is super_admin
-			if ( is_super_admin() ) {
+			// Display message that carousel has bailed, if user is super_admin, and if we're not on WordPress.com.
+			if (
+				is_super_admin() &&
+				! ( defined( 'IS_WPCOM' ) && IS_WPCOM )
+			) {
 				add_filter( 'post_gallery', array( $this, 'display_bail_message' ) );
 			}
 			return $output;
@@ -149,7 +152,7 @@ class Jetpack_Carousel {
 		do_action( 'jp_carousel_thumbnails_shown' );
 
 		if ( $this->first_run ) {
-			wp_enqueue_script( 'jetpack-carousel', plugins_url( 'jetpack-carousel.js', __FILE__ ), array( 'jquery.spin' ), $this->asset_version( '20140505' ), true );
+			wp_enqueue_script( 'jetpack-carousel', plugins_url( 'jetpack-carousel.js', __FILE__ ), array( 'jquery.spin' ), $this->asset_version( '20160325' ), true );
 
 			// Note: using  home_url() instead of admin_url() for ajaxurl to be sure  to get same domain on wpcom when using mapped domains (also works on self-hosted)
 			// Also: not hardcoding path since there is no guarantee site is running on site root in self-hosted context.
@@ -327,17 +330,10 @@ class Jetpack_Carousel {
 		if ( isset( $post ) ) {
 			$blog_id = (int) get_current_blog_id();
 
-			if ( defined( 'IS_WPCOM' ) && IS_WPCOM ) {
-				$likes_blog_id = $blog_id;
-			} else {
-				$likes_blog_id = Jetpack_Options::get_option( 'id' );
-			}
-
 			$extra_data = array(
 				'data-carousel-extra' => array(
 					'blog_id' => $blog_id,
 					'permalink' => get_permalink( $post->ID ),
-					'likes_blog_id' => $likes_blog_id
 					)
 				);
 

@@ -100,7 +100,12 @@ class WPCOM_JSON_API_Update_Post_v1_2_Endpoint extends WPCOM_JSON_API_Update_Pos
 			}
 		}
 
-		// If date is set, $this->input will set date_gmt, date still needs to be adjusted for the blog's offset
+		if ( function_exists( 'wpcom_switch_to_locale' ) ) {
+			// fixes calypso-pre-oss #12476: respect blog locale when creating the post slug
+			wpcom_switch_to_locale( get_blog_lang_code( $blog_id ) );
+		}
+
+		 // If date is set, $this->input will set date_gmt, date still needs to be adjusted f
 		if ( isset( $input['date_gmt'] ) ) {
 			$gmt_offset = get_option( 'gmt_offset' );
 			$time_with_offset = strtotime( $input['date_gmt'] ) + $gmt_offset * HOUR_IN_SECONDS;
@@ -190,6 +195,7 @@ class WPCOM_JSON_API_Update_Post_v1_2_Endpoint extends WPCOM_JSON_API_Update_Pos
 			}
 
 			foreach ( $terms as $term ) {
+				$term = (string) $term; // ctype_digit compat
 				if ( ! ctype_digit( $term ) ) {
 					// skip anything that doesn't look like an ID
 					continue;
@@ -610,7 +616,7 @@ class WPCOM_JSON_API_Update_Post_v1_2_Endpoint extends WPCOM_JSON_API_Update_Pos
 		if ( ! empty( $media_results['errors'] ) )
 			$return['media_errors'] = $media_results['errors'];
 
-		if ( 'publish' !== $post->post_status && isset( $input['title'] )) {
+		if ( ! $new && 'publish' !== $post->post_status && isset( $input['title'] ) ) {
 			$return['other_URLs'] = (object) $this->get_post_permalink_suggestions( $post_id, $input['title'] );
 		}
 

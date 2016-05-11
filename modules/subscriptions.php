@@ -607,7 +607,7 @@ class Jetpack_Subscriptions {
 
 		$str = '';
 
-		if ( FALSE === has_filter( 'comment_form', 'show_subscription_checkbox' ) && 1 == get_option( 'stc_enabled', 1 ) && empty( $post->post_password ) ) {
+		if ( FALSE === has_filter( 'comment_form', 'show_subscription_checkbox' ) && 1 == get_option( 'stc_enabled', 1 ) && empty( $post->post_password ) && 'post' == get_post_type() ) {
 			// Subscribe to comments checkbox
 			$str .= '<p class="comment-subscription-form"><input type="checkbox" name="subscribe_comments" id="subscribe_comments" value="subscribe" style="width: auto; -moz-appearance: checkbox; -webkit-appearance: checkbox;"' . $comments_checked . ' /> ';
 			$comment_sub_text = __( 'Notify me of follow-up comments by email.', 'jetpack' );
@@ -880,9 +880,9 @@ class Jetpack_Subscriptions_Widget extends WP_Widget {
 			Custom functionality for safari and IE
 			 */
 			(function( d ) {
-				// Creates placeholders for IE
+				// In case the placeholder functionality is available we remove labels
 				if ( ( 'placeholder' in d.createElement( 'input' ) ) ) {
-					var label = d.getElementById( 'jetpack-subscribe-label' );
+					var label = d.querySelector( 'label[for=subscribe-field-<?php echo $widget_id; ?>]' );
 						label.style.clip 	 = 'rect(1px, 1px, 1px, 1px)';
 						label.style.position = 'absolute';
 						label.style.height   = '1px';

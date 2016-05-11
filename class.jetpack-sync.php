@@ -170,7 +170,7 @@ class Jetpack_Sync {
 		}
 
 		// Don't sync anything from a staging site.
-		if ( Jetpack::is_development_mode() || Jetpack::jetpack_is_staging_site() ) {
+		if ( Jetpack::is_development_mode() || Jetpack::is_staging_site() ) {
 			return false;
 		}
 
@@ -1010,7 +1010,7 @@ EOT;
 
 		$results = json_decode( wp_remote_retrieve_body( $response ), true );
 
-		return (int) $results['results']['total'];
+		return isset( $results['results'] ) && isset( $results['results']['total'] ) ? (int) $results['results']['total'] : 0;
 	}
 
 	/**

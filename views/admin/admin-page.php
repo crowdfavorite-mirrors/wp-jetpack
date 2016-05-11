@@ -1,5 +1,3 @@
-<div class="clouds-sm"></div>
-
 <div class="page-content landing">
 	<?php Jetpack::init()->load_view( 'admin/network-activated-notice.php' ); ?>
 
@@ -17,13 +15,21 @@
 		<?php if ( $data['show_jumpstart'] && 'new_connection' === Jetpack_Options::get_option( 'jumpstart' ) && current_user_can( 'jetpack_manage_modules' ) && ! Jetpack::is_development_mode() ) : ?>
 
 			<div id="jump-start-success"></div>
-			<div id="jump-start-area" class="j-row">
+			<div id="jump-start-area" class="jump-start-area j-row">
 				<h1 title="<?php esc_attr_e( 'Jump Start your site by activating these components', 'jetpack' ); ?>" class="jstart"><?php _e( 'Jump Start your site', 'jetpack' ); ?></h1>
 				<div class="jumpstart-desc j-col j-sm-12 j-md-12">
 					<div class="jumpstart-message">
-						<p id="jumpstart-paragraph-before"><?php echo sprintf( __( 'To quickly boost performance, security, and engagement we recommend activating <strong>%s</strong>. Click <strong>Jump Start</strong> to activate these features or ', 'jetpack' ), $data['jumpstart_list'] ); ?>
-							<a class="pointer jp-config-list-btn"><?php _e( 'learn more.', 'jetpack' ); ?></a>
-						</p>
+						<p id="jumpstart-paragraph-before"><?php
+							if ( count( $data['jumpstart_list'] ) > 1 ) {
+								$last_item = array_pop( $data['jumpstart_list'] );
+								/* translators: %1$s is a comma-separated list of module names or a single module name, %2$s is the last item in the module list */
+								echo sprintf( __( 'To quickly boost performance, security, and engagement we recommend activating <strong>%1$s and %2$s</strong>. Click <strong>Jump Start</strong> to activate these features or <a class="pointer jp-config-list-btn">learn more</a>', 'jetpack' ), implode( $data['jumpstart_list'], ', ' ), $last_item );
+
+							} else {
+								/* translators: %s is a module name */
+								echo sprintf( __( 'To quickly boost performance, security, and engagement we recommend activating <strong>%s</strong>. Click <strong>Jump Start</strong> to activate this feature or <a class="pointer jp-config-list-btn">learn more</a>', 'jetpack' ), $data['jumpstart_list'][0] );
+							}
+						?></p>
 					</div><!-- /.jumpstart-message -->
 				</div>
 				<div class="jumpstart-message hide">
@@ -31,7 +37,7 @@
 					<p><?php echo sprintf( __( 'Check out other recommended features below, or go to the <a href="%s">settings</a> page to customize your Jetpack experience.', 'jetpack' ), admin_url( 'admin.php?page=jetpack_modules' ) ); ?></p>
 				</div><!-- /.jumpstart-message -->
 				<div id="jumpstart-cta" class="j-col j-sm-12 j-md-12 j-lrg-4">
-					<img class="jumpstart-spinner" style="margin: 49px auto 14px; display: none;" width="17" height="17" src="<?php echo esc_url( includes_url( 'images/spinner-2x.gif' ) ); ?>" alt="Loading ..." />
+					<img class="jumpstart-spinner" style="margin: 50px auto 14px; display: none;" width="17" height="17" src="<?php echo esc_url( includes_url( 'images/spinner-2x.gif' ) ); ?>" alt="Loading ..." />
 					<a id="jump-start" class="button-primary" ><?php esc_html_e( 'Jump Start', 'jetpack' ); ?></a>
 					<a class="dismiss-jumpstart pointer" ><?php esc_html_e( 'Skip', 'jetpack' ); ?></a>
 				</div>
@@ -63,7 +69,7 @@
 
 					<h3 title="<?php esc_attr_e( 'Performance &amp; Security', 'jetpack' ); ?>">
 						<?php /* Leave out until better link is available
-						<a class="dashicons dashicons-editor-help" href="http://jetpack.me/features/" title="<?php esc_attr_e( 'Learn more about Jetpack\'s Performance &amp; Security tools', 'jetpack' ); ?>" target="_blank"></a>
+						<a class="dashicons dashicons-editor-help" href="http://jetpack.com/features/" title="<?php esc_attr_e( 'Learn more about Jetpack\'s Performance &amp; Security tools', 'jetpack' ); ?>" target="_blank"></a>
                         */ ?>
 						<?php _e( 'Performance &amp; Security', 'jetpack' ); ?>
 					</h3>
@@ -81,7 +87,7 @@
 
 					<h3 title="<?php esc_attr_e( 'Traffic Growth', 'jetpack' ); ?>">
 						<?php /* Leave out until better link is available
-						<a class="dashicons dashicons-editor-help" href="http://jetpack.me/features/" title="<?php esc_attr_e( 'Learn more about Jetpack\'s Traffic Boosting tools', 'jetpack' ); ?>" target="_blank"></a>
+						<a class="dashicons dashicons-editor-help" href="http://jetpack.com/features/" title="<?php esc_attr_e( 'Learn more about Jetpack\'s Traffic Boosting tools', 'jetpack' ); ?>" target="_blank"></a>
 						*/ ?>
                         <?php _e( 'Traffic Growth', 'jetpack' ); ?>
 					</h3>
@@ -98,7 +104,7 @@
 			<div class="wpcom j-col j-lrg-4 main-col">
 				<div class="nux-in">
 
-					<h3 title="<?php esc_attr_e( 'WordPress.com Tools', 'jetpack' ); ?>"><a class="dashicons dashicons-editor-help" href="http://jetpack.me/support/site-management/" title="<?php esc_attr_e( 'Learn more about WordPress.com\'s free tools', 'jetpack' ); ?>" target="_blank"></a><?php _e( 'WordPress.com Tools', 'jetpack' ); ?></h3>
+					<h3 title="<?php esc_attr_e( 'WordPress.com Tools', 'jetpack' ); ?>"><a class="dashicons dashicons-editor-help" href="http://jetpack.com/support/site-management/" title="<?php esc_attr_e( 'Learn more about WordPress.com\'s free tools', 'jetpack' ); ?>" target="_blank"></a><?php _e( 'WordPress.com Tools', 'jetpack' ); ?></h3>
 
 					<div class="j-row">
 						<div class="j-col j-lrg-12 j-md-12 j-sm-12">
@@ -169,14 +175,13 @@
 
 	</div><?php // j-row ?>
 
-		<p><?php _e( 'Jetpack includes many other features that you can use to customize how your site looks and functions. These include Contact Forms, Tiled Photo Galleries, Custom CSS, Image Carousel, and a lot more.', 'jetpack' ); ?></p>
-
 		<?php if ( current_user_can( 'jetpack_manage_modules' ) ) : ?>
+			<p><?php _e( 'Jetpack includes many other features that you can use to customize how your site looks and functions. These include Contact Forms, Tiled Photo Galleries, Custom CSS, Image Carousel, and a lot more.', 'jetpack' ); ?></p>
 			<p><a href="<?php echo admin_url( 'admin.php?page=jetpack_modules' ); ?>" class="button full-features-btn" ><?php echo sprintf( __( 'See the other %s Jetpack features', 'jetpack' ), count( Jetpack::get_available_modules() ) - count( $data['recommended_list'] ) ); ?></a></p>
 		<?php endif; ?>
 
 		<div class="nux-foot j-row">
-			<div class="j-col j-lrg-9 j-md-9 j-sm-12">
+			<div class="j-col j-lrg-8 j-md-8 j-sm-12">
 			<?php
 				// Get a list of Jetpack Happiness Engineers.
 				$jetpack_hes = array(
@@ -190,55 +195,35 @@
 					'9d4b77080c699629e846d3637b3a661c',
 					'4626de7797aada973c1fb22dfe0e5109',
 					'190cf13c9cd358521085af13615382d5',
+					'0d6982875acab8158ccc8b77aa67251a',
+					'f7006d10e9f7dd7bea89a001a2a2fd59',
+					'16acbc88e7aa65104ed289d736cb9698',
+					'4d5ad4219c6f676ea1e7d40d2e8860e8',
 				);
 
-				// Get a fallack profile image.
+				// Get a fallback profile image.
 				$default_he_img = plugins_url( 'images/jetpack-icon.jpg', JETPACK__PLUGIN_FILE );
 
 				printf(
-					'<a href="http://jetpack.me/support/" target="_blank"><img src="https://secure.gravatar.com/avatar/%1$s?s=75&d=%2$s" alt="Jetpack Happiness Engineer" /></a>',
+					'<a href="http://jetpack.com/support/" target="_blank"><img src="https://secure.gravatar.com/avatar/%1$s?s=75&d=%2$s" alt="Jetpack Happiness Engineer" /></a>',
 					$jetpack_hes[ array_rand( $jetpack_hes ) ],
 					urlencode( $default_he_img )
 				);
 			?>
-			<p><?php _e( 'Need help? The Jetpack team is here for you!', 'jetpack' ); ?></p>
-			<p><?php _e( 'We offer free, full support to all of our Jetpack users. Our support team is always around to help you.', 'jetpack' );
-				echo ' ';
-				printf(
-					__(
-						'<a href="%1$s" target="_blank">View our support page</a>, <a href="%2$s" target="_blank">check the forums for answers</a>, or <a href="%3$s" target="_blank">contact us directly</a>',
-						'jetpack'
-					),
-					'http://jetpack.me/support/',
-					'https://wordpress.org/support/plugin/jetpack',
-					'http://jetpack.me/contact-support/'
-				);
-			?></p>
-			</div>
-			<div class="j-col j-lrg-3 j-md-3 j-sm-12">
-			<p><?php _e( 'Enjoying Jetpack? Got Feedback?', 'jetpack' ); ?></p>
-			<ul>
-				<li><?php _e( '- ', 'jetpack'); ?><a href="https://wordpress.org/support/view/plugin-reviews/jetpack" target="_blank" title="<?php esc_attr_e( 'Leave Jetpack a review', 'jetpack' ); ?>"><?php _e( 'Leave us a review', 'jetpack' ); ?></a></li>
-				<li><?php
-					$jetpack_twitter_url = sprintf(
-						'<a href="http://twitter.com/jetpack" target="_blank" title="%1$s">%2$s</a>',
-						esc_attr__( 'Jetpack on Twitter', 'jetpack' ),
-						__( 'Twitter', 'jetpack' )
-					);
-
-					$jetpack_facebook_url = sprintf(
-						'<a href="https://www.facebook.com/jetpackme" target="_blank" title="%1$s">%2$s</a>',
-						esc_attr__( 'Jetpack on Facebook', 'jetpack' ),
-						__( 'Facebook', 'jetpack' )
-					);
-
-					printf(
-						_x( '- Follow us on %1$s or %2$s', '1: Twitter; 2: Facebook', 'jetpack' ),
-						$jetpack_twitter_url,
-						$jetpack_facebook_url
-					);
-				?></li>
+			<p><?php _e( 'Help and Support', 'jetpack' ); ?></p>
+			<p><?php _e( 'We offer free, full support to all Jetpack users. Our support team is always around to help you.', 'jetpack' ); ?></p>
+			<ul class="actions">
+				<li><a href="http://jetpack.com/support/" target="_blank" class="button"><?php esc_html_e( 'Visit support site', 'jetpack' ); ?></a></li>
+				<li><a href="https://wordpress.org/support/plugin/jetpack" target="_blank"><?php esc_html_e( 'Browse forums', 'jetpack' ); ?></a></li>
+				<li><a href="http://jetpack.com/contact-support/" target="_blank"><?php esc_html_e( 'Contact us directly', 'jetpack' ); ?></a></li>
 			</ul>
+			</div>
+			<div class="j-col j-lrg-4 j-md-4 j-sm-12">
+				<p><?php _e( 'Premium Add-ons', 'jetpack' ); ?></p>
+				<p><?php esc_html_e( 'Business site? Safeguard it with real-time backups, security scans, and anti-spam.', 'jetpack' ); ?></p>
+				<p>&nbsp;</p>
+				<?php $normalized_site_url = Jetpack::build_raw_urls( get_home_url() ); ?>
+				<div class="actions jptracks" data-jptracks-name="nudge_click" data-jptracks-prop="nux-addons"><a href="<?php echo esc_url( 'https://wordpress.com/plans/' . $normalized_site_url ); ?>" target="_blank" class="button"><?php esc_html_e( 'Compare Options', 'jetpack' ); ?></a></div>
 			</div>
 		</div><?php // nux-foot ?>
 
@@ -247,17 +232,167 @@
 </div><!-- .landing -->
 
 	<?php else : ?>
-		<div id="jump-start-area" class="j-row">
+
+		<div class="connection-landing">
+
+		<div class="connect-card j-row">
 			<h1 title="<?php esc_attr_e( 'Please Connect Jetpack', 'jetpack' ); ?>"><?php esc_html_e( 'Please Connect Jetpack', 'jetpack' ); ?></h1>
 			<div class="connect-btn j-col j-sm-12 j-md-12">
 				<p><?php echo wp_kses( __( 'Connecting Jetpack will show you <strong>stats</strong> about your traffic, <strong>protect</strong> you from brute force attacks, <strong>speed up</strong> your images and photos, and enable other <strong>traffic and security</strong> features.', 'jetpack' ), 'jetpack' ) ?></p>
 				<?php if ( ! $data['is_connected'] && current_user_can( 'jetpack_connect' ) ) : ?>
-					<a href="<?php echo Jetpack::init()->build_connect_url() ?>" class="download-jetpack"><?php esc_html_e( 'Connect Jetpack', 'jetpack' ); ?></a>
+					<a href="<?php echo Jetpack::init()->build_connect_url( false, false, 'landing-page-top' ) ?>" class="download-jetpack"><?php esc_html_e( 'Connect Jetpack', 'jetpack' ); ?></a>
+				<?php elseif ( $data['is_connected'] && ! $data['is_user_connected'] && current_user_can( 'jetpack_connect_user' ) ) : ?>
+					<a href="<?php echo Jetpack::init()->build_connect_url( false, false, 'landing-page-top' ) ?>" class="download-jetpack"><?php esc_html_e( 'Connect your account', 'jetpack' ); ?></a>
+				<?php endif; ?>
+			</div>
+		</div> <?php // connect-card ?>
+
+			<div class="j-traffic feature-container jp-card">
+				<header class="first-header j-int">
+					<h2 title="<?php esc_attr_e( 'Drive more traffic to your site', 'jetpack' ); ?>"><?php
+						esc_html_e( 'Drive more traffic to your site', 'jetpack' );
+					?></h2>
+					<div class="j-header-img">
+						<img src="<?php echo plugins_url( 'images/connection-landing/long-clouds.svg', JETPACK__PLUGIN_FILE ); ?>" width="1135" height="63" alt="<?php echo esc_attr_x( 'Jetpack clouds image', 'Image alternative text', 'jetpack' ); ?>" /> <?php // must define dimensions here for older IEs ?>
+						<img src="<?php echo plugins_url( 'images/connection-landing/stat-bars.svg', JETPACK__PLUGIN_FILE ); ?>" width="400" alt="<?php echo esc_attr_x( 'Decorative graph image', 'Image alternative text', 'jetpack' ); ?>" />
+					</div>
+				</header>
+
+				<div class="three-feature j-row">
+					<div class="j-col j-sm-12 j-md-12 j-lrg-4">
+						<h3 title="<?php esc_attr_e( 'Automated social marketing', 'jetpack' ); ?>"><?php
+							esc_html_e( 'Automated social marketing', 'jetpack' );
+						?></h3>
+						<p><?php esc_html_e( 'Use Publicize to automatically share your posts with friends, followers, and the world.', 'jetpack' ); ?></p>
+					</div>
+					<div class="j-col j-sm-12 j-md-12 j-lrg-4">
+						<h3 title="<?php esc_attr_e( 'Build a community', 'jetpack' ); ?>"><?php
+							esc_html_e( 'Build a community', 'jetpack' );
+						?></h3>
+						<p><?php esc_html_e( 'Give visitors the tools to Share and Subscribe to your content.', 'jetpack' ); ?></p>
+					</div>
+					<div class="j-col j-sm-12 j-md-12 j-lrg-4">
+						<h3 title="<?php esc_attr_e( 'Increase page views', 'jetpack' ); ?>"><?php
+							esc_html_e( 'Increase page views', 'jetpack' );
+						?></h3>
+						<p><?php esc_html_e( 'Keep visitors engaged, by giving them more to share and read with Related Posts.', 'jetpack' ); ?></p>
+					</div>
+				</div><?php // three-feature ?>
+
+				<header class="secondary-header j-int">
+					<h2 title="<?php esc_attr_e( 'Track your growth', 'jetpack' ); ?>">
+						<?php esc_html_e( 'Track your growth', 'jetpack' ); ?>
+					</h2>
+				</header>
+
+				<div class="j-feature-img">
+					<img src="<?php
+							echo plugins_url( 'images/connection-landing/stats-example-med.png', JETPACK__PLUGIN_FILE );
+						?>"
+					srcset="<?php
+							echo plugins_url( 'images/connection-landing/stats-example-sm.png', JETPACK__PLUGIN_FILE );
+						?> 500w, <?php
+							echo plugins_url( 'images/connection-landing/stats-example-med.png', JETPACK__PLUGIN_FILE );
+						?> 600w, <?php
+							echo plugins_url( 'images/connection-landing/stats-example-lrg.png', JETPACK__PLUGIN_FILE );
+						?> 900w" alt="<?php esc_attr_e( 'View detailed insights and analytics about your site with Jetpack', 'jetpack' ); ?>" />
+				</div>
+
+			</div><?php // jp-card ?>
+
+
+			<div class="j-security feature-container jp-card">
+				<header class="first-header j-int">
+					<h2 title="<?php esc_attr_e( 'Site Security and Peace of Mind', 'jetpack' ); ?>"><?php
+						esc_html_e( 'Site Security and Peace of Mind', 'jetpack' );
+					?></h2>
+					<div class="j-header-img">
+						<img src="<?php echo plugins_url( 'images/connection-landing/long-clouds.svg', JETPACK__PLUGIN_FILE ); ?>" width="1135" height="63" alt="<?php echo esc_attr_x( 'Decorative graph image', 'Image alternative text', 'jetpack' ); ?>" /> <?php // must define dimensions here for older IEs ?>
+						<img src="<?php echo plugins_url( 'images/connection-landing/jp-shield.svg', JETPACK__PLUGIN_FILE ); ?>" width="180" alt="<?php echo esc_attr_x( 'Decorative shield image', 'Image alternative text', 'jetpack' ); ?>" />
+					</div>
+				</header>
+
+				<div class="three-feature j-row">
+					<div class="j-col j-sm-12 j-md-12 j-lrg-4">
+						<h3 title="<?php esc_attr_e( 'Block site attacks', 'jetpack' ); ?>"><?php
+							esc_html_e( 'Block site attacks', 'jetpack' );
+						?></h3>
+						<p><?php esc_html_e( 'Gain peace of mind with Protect, the tool that has blocked billions of login attacks on millions of sites.', 'jetpack' ); ?></p>
+					</div>
+					<div class="j-col j-sm-12 j-md-12 j-lrg-4">
+						<h3 title="<?php esc_attr_e( 'Live site monitoring​', 'jetpack' ); ?>"><?php
+							esc_html_e( 'Live site monitoring​', 'jetpack' );
+						?></h3>
+						<p><?php esc_html_e( 'Stress less. Monitor will send you real-time alerts if your site ever goes down.', 'jetpack' ); ?></p>
+					</div>
+					<div class="j-col j-sm-12 j-md-12 j-lrg-4">
+						<h3 title="<?php esc_attr_e( 'Automatic Updates', 'jetpack' ); ?>"><?php
+							esc_html_e( 'Automatic updates', 'jetpack' );
+						?></h3>
+						<p><?php esc_html_e( 'With Manage, you’ll never be behind on a security release or waste time updating multiple sites.', 'jetpack' ); ?></p>
+					</div>
+				</div><?php // three-feature ?>
+			</div><?php // jp-card ?>
+
+			<div class="j-security feature-container jp-card">
+				<header class="secondary-header j-int">
+					<h2 title="<?php esc_attr_e( 'Optimized Images, Lightning Fast', 'jetpack' ); ?>"><?php
+						esc_html_e( 'Optimized Images, Lightning Fast', 'jetpack' );
+					?></h2>
+					<p><?php esc_html_e( 'Jetpack utilizes the state-of-the-art WordPress.com content delivery network to load your gorgeous images super fast optimized for any device, and it’s completely free.', 'jetpack' ); ?></p>
+				</header>
+
+				<div class="j-feature-img">
+					<img src="<?php
+							echo plugins_url( 'images/connection-landing/feature-photon-med.jpg', JETPACK__PLUGIN_FILE );
+						 ?>"
+						 srcset="<?php
+							echo plugins_url( 'images/connection-landing/feature-photon-sm.jpg', JETPACK__PLUGIN_FILE );
+						?> 500w, <?php
+							echo plugins_url( 'images/connection-landing/feature-photon-med.jpg', JETPACK__PLUGIN_FILE );
+						?> 600w, <?php
+							echo plugins_url( 'images/connection-landing/feature-photon-lrg.jpg', JETPACK__PLUGIN_FILE );
+						?> 900w" alt="<?php esc_attr_e( 'Have faster loading images with Jetpack Photon', 'jetpack' ); ?>" />
+				</div>
+			</div><?php // jp-card ?>
+
+			<div class="j-security feature-container jp-card">
+				<header class="secondary-header j-int">
+					<h2 title="<?php esc_attr_e( 'Free professional support', 'jetpack' ); ?>"><?php
+						esc_html_e( 'Free professional support', 'jetpack' );
+					?></h2>
+					<p><?php esc_html_e( 'Jetpack is supported by some of the most technical and passionate people in the community. Located around the globe and ready to help you.', 'jetpack' ); ?></p>
+				</header>
+
+				<div class="j-feature-img">
+					<img src="<?php
+							echo plugins_url( 'images/connection-landing/aurora-med.jpg', JETPACK__PLUGIN_FILE );
+						?>"
+						srcset="<?php
+							echo plugins_url( 'images/connection-landing/aurora-sm.jpg', JETPACK__PLUGIN_FILE );
+						?> 500w, <?php
+							echo plugins_url( 'images/connection-landing/aurora-med.jpg', JETPACK__PLUGIN_FILE );
+						?> 600w, <?php
+							echo plugins_url( 'images/connection-landing/aurora-lrg.jpg', JETPACK__PLUGIN_FILE );
+						?> 900w" alt="<?php esc_attr_e( 'Jetpack has an amazing free support team', 'jetpack' ); ?>" />
+				</div>
+			</div><?php // jp-card ?>
+
+
+		<div class="connect-card j-row">
+			<div class="connect-btn j-col j-sm-12 j-md-12">
+				<?php if ( ! $data['is_connected'] && current_user_can( 'jetpack_connect' ) ) : ?>
+					<a href="<?php echo Jetpack::init()->build_connect_url( false, false, 'landing-page-bottom' ) ?>" class="download-jetpack"><?php esc_html_e( 'Connect Jetpack', 'jetpack' ); ?></a>
 				<?php elseif ( $data['is_connected'] && ! $data['is_user_connected'] && current_user_can( 'jetpack_connect_user' ) ) : ?>
 					<a href="<?php echo Jetpack::init()->build_connect_url() ?>" class="download-jetpack"><?php esc_html_e( 'Connect your account', 'jetpack' ); ?></a>
 				<?php endif; ?>
 			</div>
-		</div>
+		</div> <?php // connect-card ?>
+
+
+		</div> <?php // connection landing ?>
+
+
 	<?php endif; ?>
 <div id="deactivate-success"></div>
 <?php if ( Jetpack::is_development_version() ) { ?>
