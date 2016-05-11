@@ -7,6 +7,7 @@
  * Requires Connection: No
  * Auto Activate: Yes
  * Module Tags: Social, Appearance
+ * Additional Search Queries: widget, widgets, facebook, gallery, twitter, gravatar, image, rss
  */
 
 function jetpack_load_widgets() {
@@ -17,6 +18,8 @@ function jetpack_load_widgets() {
 	}
 	/**
 	 * Modify which Jetpack Widgets to register.
+	 *
+	 * @module widgets
 	 *
 	 * @since 2.2.1
 	 *
@@ -52,3 +55,13 @@ add_filter( 'jetpack_widget_name', 'jetpack_widgets_add_suffix' );
 
 
 jetpack_load_widgets();
+
+/**
+ * Enqueue utilities to work with widgets in Customizer.
+ *
+ * @since 4.0.0
+ */
+function jetpack_widgets_customizer_assets() {
+	wp_enqueue_script( 'jetpack-customizer-widget-utils', plugins_url( '/widgets/customizer-utils.js', __FILE__ ), array( 'jquery' ) );
+}
+add_action( 'customize_preview_init', 'jetpack_widgets_customizer_assets' );

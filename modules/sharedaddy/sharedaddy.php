@@ -13,7 +13,17 @@ require_once plugin_dir_path( __FILE__ ).'sharing.php';
 function sharing_email_send_post( $data ) {
 
 	$content = sharing_email_send_post_content( $data );
-	$headers[] = sprintf( 'From: %1$s <%2$s>', $data['name'], $data['source'] );
+	// Borrowed from wp_mail();
+	$sitename = strtolower( $_SERVER['SERVER_NAME'] );
+	if ( substr( $sitename, 0, 4 ) == 'www.' ) {
+		$sitename = substr( $sitename, 4 );
+	}
+
+	/** This filter is documented in core/src/wp-includes/pluggable.php */
+	$from_email = apply_filters( 'wp_mail_from', 'wordpress@' . $sitename );
+
+	$headers[] = sprintf( 'From: %1$s <%2$s>', $data['name'], $from_email );
+	$headers[] = sprintf( 'Reply-To: %1$s <%2$s>', $data['name'], $data['source'] );
 
 	wp_mail( $data['target'], '['.__( 'Shared Post', 'jetpack' ).'] '.$data['post']->post_title, $content, $headers );
 }
@@ -67,9 +77,26 @@ function sharing_add_meta_box() {
 	if ( empty( $post ) ) { // If a current post is not defined, such as when editing a comment.
 		return;
 	}
+
+	/**
+	 * Filter whether to display the Sharing Meta Box or not.
+	 *
+	 * @module sharedaddy
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param bool true Display Sharing Meta Box.
+	 * @param $post Post.
+	 */
+	if ( ! apply_filters( 'sharing_meta_box_show', true, $post ) ) {
+		return;
+	}
+
 	$post_types = get_post_types( array( 'public' => true ) );
 	/**
 	 * Filter the Sharing Meta Box title.
+	 *
+	 * @module sharedaddy
 	 *
 	 * @since 2.2.0
 	 *
@@ -87,6 +114,8 @@ function sharing_add_meta_box() {
 function sharing_meta_box_content( $post ) {
 	/**
 	 * Fires before the sharing meta box content.
+	 *
+	 * @module sharedaddy
 	 *
 	 * @since 2.2.0
 	 *
@@ -107,6 +136,8 @@ function sharing_meta_box_content( $post ) {
 	<?php
 	/**
 	 * Fires after the sharing meta box content.
+	 *
+	 * @module sharedaddy
 	 *
 	 * @since 2.2.0
 	 *
@@ -153,7 +184,7 @@ function sharing_plugin_settings( $links ) {
 function sharing_add_plugin_settings($links, $file) {
 	if ( $file == basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ) ) {
 		$links[] = '<a href="options-general.php?page=sharing.php">' . __( 'Settings', 'jetpack' ) . '</a>';
-		$links[] = '<a href="http://support.wordpress.com/sharing/">' . __( 'Support', 'jetpack' ) . '</a>';
+		$links[] = '<a href="http://support.wordpress.com/sharing/" target="_blank">' . __( 'Support', 'jetpack' ) . '</a>';
 	}
 
 	return $links;

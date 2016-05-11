@@ -1,5 +1,9 @@
 <?php
 
+defined( 'ABSPATH' ) or die( 'No direct access, please.' );
+
+require_once( ABSPATH . WPINC . '/class-IXR.php' );
+
 /**
  * IXR_Client
  *
@@ -28,10 +32,6 @@ class Jetpack_IXR_Client extends IXR_Client {
 		$method = array_shift( $args );
 		$request = new IXR_Request( $method, $args );
 		$xml = trim( $request->getXml() );
-
-		$headers = array(
-			'Content-Type' => 'text/xml',
-		);
 
 		$response = Jetpack_Client::remote_request( $this->jetpack_args, $xml );
 

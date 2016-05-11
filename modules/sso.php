@@ -11,6 +11,7 @@
  * Auto Activate: No
  * Module Tags: Developers
  * Feature: Jumpstart, Performance-Security
+ * Additional Search Queries: sso, single sign on, login, log in
  */
 
 class Jetpack_SSO {
@@ -35,6 +36,8 @@ class Jetpack_SSO {
 			$this->should_hide_login_form() &&
 			/**
 			 * Filter the display of the disclaimer message appearing when default WordPress login form is disabled.
+			 *
+			 * @module sso
 			 *
 			 * @since 2.8.0
 			 *
@@ -216,8 +219,11 @@ class Jetpack_SSO {
 	 * @since 2.7
 	 **/
 	public function render_require_two_step() {
+		/** This filter is documented in modules/sso.php */
+		$require_two_step = 1 == apply_filters( 'jetpack_sso_require_two_step', get_option( 'jetpack_sso_require_two_step' ) );
+		$disabled = $require_two_step ? ' disabled="disabled"' : '';
 		echo '<label>';
-		echo '<input type="checkbox" name="jetpack_sso_require_two_step" ' . checked( 1 == get_option( 'jetpack_sso_require_two_step' ), true, false ) . '> ';
+		echo '<input type="checkbox" name="jetpack_sso_require_two_step" ' . checked( $require_two_step, true, false ) . "$disabled>";
 		esc_html_e( 'Require Two-Step Authentication' , 'jetpack' );
 		echo '</label>';
 	}
@@ -239,8 +245,10 @@ class Jetpack_SSO {
 	 * @since 2.9
 	 **/
 	public function render_match_by_email() {
+		$match_by_email = 1 == $this->match_by_email();
+		$disabled = $match_by_email ? ' disabled="disabled"' : '';
 		echo '<label>';
-		echo '<input type="checkbox" name="jetpack_sso_match_by_email"' . checked( 1 == get_option( 'jetpack_sso_match_by_email' ), true, false) . '> ';
+		echo '<input type="checkbox" name="jetpack_sso_match_by_email"' . checked( $match_by_email, true, false ) . "$disabled>";
 		esc_html_e( 'Match by Email', 'jetpack' );
 		echo '</label>';
 	}
@@ -326,6 +334,8 @@ class Jetpack_SSO {
 		/**
 		 * Redirect the site's log in form to WordPress.com's log in form.
 		 *
+		 * @module sso
+		 *
 		 * @since 3.1.0
 		 *
 		 * @param bool false Should the site's log in form be automatically forwarded to WordPress.com's log in form.
@@ -356,6 +366,7 @@ class Jetpack_SSO {
 			&& $this->bypass_login_forward_wpcom()
 		) {
 			add_filter( 'allowed_redirect_hosts', array( $this, 'allowed_redirect_hosts' ) );
+			$this->maybe_save_cookie_redirect();
 			wp_safe_redirect( $this->build_sso_url() );
 		}
 
@@ -430,6 +441,8 @@ class Jetpack_SSO {
 	private function should_hide_login_form() {
 		/**
 		 * Remove the default log in form, only leave the WordPress.com log in button.
+		 *
+		 * @module sso
 		 *
 		 * @since 3.1.0
 		 *
@@ -570,6 +583,8 @@ class Jetpack_SSO {
 		/**
 		 * Fires before Jetpack's SSO modifies the log in form.
 		 *
+		 * @module sso
+		 *
 		 * @since 2.6.0
 		 *
 		 * @param object $user_data User login information.
@@ -578,6 +593,8 @@ class Jetpack_SSO {
 
 		/**
 		 * Is it required to have 2-step authentication enabled on WordPress.com to use SSO?
+		 *
+		 * @module sso
 		 *
 		 * @since 2.8.0
 		 *
@@ -663,6 +680,8 @@ class Jetpack_SSO {
 		/**
 		 * Fires after we got login information from WordPress.com.
 		 *
+		 * @module sso
+		 *
 		 * @since 2.6.0
 		 *
 		 * @param array $user WordPress.com User information.
@@ -682,6 +701,8 @@ class Jetpack_SSO {
 			}
 			/**
 			 * Filter the remember me value.
+			 *
+			 * @module sso
 			 *
 			 * @since 2.8.0
 			 *
@@ -728,6 +749,8 @@ class Jetpack_SSO {
 		/**
 		 * Link the local account to an account on WordPress.com using the same email address.
 		 *
+		 * @module sso
+		 *
 		 * @since 2.6.0
 		 *
 		 * @param bool $match_by_email Should we link the local account to an account on WordPress.com using the same email address. Default to false.
@@ -740,6 +763,8 @@ class Jetpack_SSO {
 
 		/**
 		 * Allow users to register on your site with a WordPress.com account, even though you disallow normal registrations.
+		 *
+		 * @module sso
 		 *
 		 * @since 2.6.0
 		 *
@@ -863,7 +888,7 @@ class Jetpack_SSO {
 	 * @return string
 	 **/
 	public function error_msg_enable_two_step( $message ) {
-		$err = __( sprintf( 'This site requires two step authentication be enabled for your user account on WordPress.com. Please visit the <a href="%1$s"> Security Settings</a> page to enable two step', 'https://wordpress.com/me/security/two-step' ) , 'jetpack' );
+		$err = __( sprintf( 'This site requires two step authentication be enabled for your user account on WordPress.com. Please visit the <a href="%1$s" target="_blank"> Security Settings</a> page to enable two step', 'https://wordpress.com/me/security/two-step' ) , 'jetpack' );
 
 		$message .= sprintf( '<p class="message" id="login_error">%s</p>', $err );
 
@@ -896,10 +921,12 @@ class Jetpack_SSO {
 	 **/
 	public function msg_login_by_jetpack( $message ) {
 
-		$msg = __( sprintf( 'Jetpack authenticates through WordPress.com — to log in, enter your WordPress.com username and password, or <a href="%1$s">visit WordPress.com</a> to create a free account now.', 'http://wordpress.com/signup' ) , 'jetpack' );
+		$msg = __( sprintf( 'Jetpack authenticates through WordPress.com — to log in, enter your WordPress.com username and password, or <a href="%1$s" target="_blank">visit WordPress.com</a> to create a free account now.', 'http://wordpress.com/signup' ) , 'jetpack' );
 
 		/**
 		 * Filter the message displayed when the default WordPress login form is disabled.
+		 *
+		 * @module sso
 		 *
 		 * @since 2.8.0
 		 *
@@ -997,9 +1024,9 @@ class Jetpack_SSO {
 								<span class="two_step">
 									<?php
 										if( $user_data->two_step_enabled ) {
-											?> <p class="enabled"><a href="https://wordpress.com/me/security/two-step"><?php _e( 'Two-Step Authentication Enabled', 'jetpack' ); ?></a></p> <?php
+											?> <p class="enabled"><a href="https://wordpress.com/me/security/two-step" target="_blank"><?php _e( 'Two-Step Authentication Enabled', 'jetpack' ); ?></a></p> <?php
 										} else {
-											?> <p class="disabled"><a href="https://wordpress.com/me/security/two-step"><?php _e( 'Two-Step Authentication Disabled', 'jetpack' ); ?></a></p> <?php
+											?> <p class="disabled"><a href="https://wordpress.com/me/security/two-step" target="_blank"><?php _e( 'Two-Step Authentication Disabled', 'jetpack' ); ?></a></p> <?php
 										}
 									?>
 								</span>

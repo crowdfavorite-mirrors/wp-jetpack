@@ -280,7 +280,7 @@ class VideoPress_Player {
 		$html .= '<input type="submit" value="' . __( 'Submit', 'jetpack' ) . '" style="cursor:pointer;border-radius: 1em;border:1px solid #333;background-color:#333;background:-webkit-gradient( linear, left top, left bottom, color-stop(0.0, #444), color-stop(1, #111) );background:-moz-linear-gradient(center top, #444 0%, #111 100%);font-size:13px;padding:4px 10px 5px;line-height:1em;vertical-align:top;color:white;text-decoration:none;margin:0" />';
 
 		$html .= '</fieldset>';
-		$html .= '<p style="padding-top:20px;padding-bottom:60px;text-align:' . $text_align . ';"><a rel="nofollow" href="http://videopress.com/" style="color:rgb(128,128,128);text-decoration:underline;font-size:15px">' . __( 'More information', 'jetpack' ) . '</a></p>';
+		$html .= '<p style="padding-top:20px;padding-bottom:60px;text-align:' . $text_align . ';"><a rel="nofollow" href="http://videopress.com/" target="_blank" style="color:rgb(128,128,128);text-decoration:underline;font-size:15px">' . __( 'More information', 'jetpack' ) . '</a></p>';
 
 		$html .= '</div>';
 		return $html;
@@ -324,7 +324,7 @@ class VideoPress_Player {
 			$html .= esc_attr( $this->video->title );
 		$html .= '" src="' . $thumbnail . '" width="' . $this->video->calculated_width . '" height="' . $this->video->calculated_height . '" /></div>';
 		if ( isset( $this->options['freedom'] ) && $this->options['freedom'] === true )
-			$html .= '<p class="robots-nocontent">' . sprintf( __( 'You do not have sufficient <a rel="nofollow" href="%s">freedom levels</a> to view this video. Support free software and upgrade.', 'jetpack' ), 'http://www.gnu.org/philosophy/free-sw.html' ) . '</p>';
+			$html .= '<p class="robots-nocontent">' . sprintf( __( 'You do not have sufficient <a rel="nofollow" href="%s" target="_blank">freedom levels</a> to view this video. Support free software and upgrade.', 'jetpack' ), 'http://www.gnu.org/philosophy/free-sw.html' ) . '</p>';
 		elseif ( isset( $this->video->title ) )
 			$html .= '<p>' . esc_html( $this->video->title ) . '</p>';
 		$html .= '</video>';
@@ -353,7 +353,9 @@ class VideoPress_Player {
 		 * This filter allows you to control whether the legacy VideoPress player should be used
 		 * instead of the improved one.
 		 *
-		 * @since 3.7
+		 * @module videopress
+		 *
+		 * @since 3.7.0
 		 *
 		 * @param boolean $videopress_use_legacy_player
 		 */
@@ -536,7 +538,7 @@ class VideoPress_Player {
 		$video_container_id = 'v-' . $this->video->guid;
 
 		// Must not use iframes for IE11 due to a fullscreen bug
-		if ( stristr( $_SERVER['HTTP_USER_AGENT'], 'Trident/7.0; rv:11.0' ) ) {
+		if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && stristr( $_SERVER['HTTP_USER_AGENT'], 'Trident/7.0; rv:11.0' ) ) {
 			$iframe_embed = false;
 		} else {
 
@@ -546,7 +548,9 @@ class VideoPress_Player {
 			 * This filter allows you to control whether the videos will be embedded using an iframe.
 			 * Set this to false in order to use an in-page embed rather than an iframe.
 			 *
-			 * @since 3.7
+			 * @module videopress
+			 *
+			 * @since 3.7.0
 			 *
 			 * @param boolean $videopress_player_use_iframe
 			 */
@@ -713,6 +717,8 @@ class VideoPress_Player {
 				/**
 				 * Filters the Flash parameters of the VideoPress player.
 				 *
+				 * @module videopress
+				 *
 				 * @since 1.2.0
 				 *
 				 * @param array $this->video->players->swf->params Array of swf parameters for the VideoPress flash player.
@@ -774,7 +780,7 @@ class VideoPress_Player {
 		foreach ( $this->get_flash_parameters() as $attribute => $value ) {
 			$flash_params .= '<param name="' . esc_attr( $attribute ) . '" value="' . esc_attr( $value ) . '" />';
 		}
-		$flash_help = sprintf( __( 'This video requires <a rel="nofollow" href="%s">Adobe Flash</a> for playback.', 'jetpack' ), 'http://www.adobe.com/go/getflashplayer');
+		$flash_help = sprintf( __( 'This video requires <a rel="nofollow" href="%s" target="_blank">Adobe Flash</a> for playback.', 'jetpack' ), 'http://www.adobe.com/go/getflashplayer');
 		$flash_player_url = esc_url( $this->video->players->swf->url, array( 'http', 'https' ) );
 		$description = '';
 		if ( isset( $this->video->title ) ) {

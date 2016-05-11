@@ -40,6 +40,7 @@ class Jetpack_Options {
 		case 'private' :
 			return array(
 				'register',
+				'authorize',
 				'blog_token',                  // (string) The Client Secret/Blog Token of this site.
 				'user_token',                  // (string) The User Token of this site. (deprecated)
 				'user_tokens'                  // (array)  User Tokens for each user of this site who has connected to jetpack.wordpress.com.
@@ -137,7 +138,6 @@ class Jetpack_Options {
 	 * @param string $autoload If not compact option, allows specifying whether to autoload or not.
 	 */
 	public static function update_option( $name, $value, $autoload = null ) {
-		
 		/**
 		 * Fires before Jetpack updates a specific option.
 		 *
